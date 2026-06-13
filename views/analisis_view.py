@@ -112,6 +112,23 @@ def render(repo, perceptron, som):
                     s=60
                 )
             
+            # Plot Centroid SOM (Pusat Cluster / Bobot Model)
+            for idx, w in enumerate(som.weights):
+                # Denormalisasi bobot mood (index 1) dan stres (index 2) ke skala asli
+                mood_c = w[1] * (repo.nilai_max[1] - repo.nilai_min[1]) + repo.nilai_min[1]
+                stres_c = w[2] * (repo.nilai_max[2] - repo.nilai_min[2]) + repo.nilai_min[2]
+                ax.scatter(
+                    mood_c,
+                    stres_c,
+                    color=colors[idx % len(colors)],
+                    edgecolors="black",
+                    s=180,
+                    marker="X",
+                    linewidths=1.5,
+                    label=f"Pusat Cluster: {som.get_cluster_name(idx)}",
+                    zorder=4
+                )
+            
             # Plot data baru
             ax.scatter(
                 mood,
@@ -144,12 +161,74 @@ def render(repo, perceptron, som):
                 "Kontribusi (Nilai x Bobot)": kontribusi
             })
             st.dataframe(df_perceptron, width="stretch")
+            
             st.markdown("**Persamaan Linear:**")
             st.latex(rf"\text{{Net Input}} = \sum (\text{{Nilai}} \times \text{{Bobot}}) + \text{{Bias}}")
             st.latex(rf"\text{{Net Input}} = {total_net_input:.4f}")
             st.markdown(f"**Bias Model**: `{bias:.4f}`")
+            
             status_aktivasi = ">= 0" if total_net_input >= 0 else "< 0"
             st.markdown(f"**Hasil Aktivasi**: `Net Input {status_aktivasi} \rightarrow` **{hasil_perceptron}**")
+
+            st.write("##### Visualisasi Garis Keputusan (Decision Boundary) Perceptron")
+            # Plot Mood vs Stres dengan pemisahan kelas Perceptron
+            fig_p, ax_p = plt.subplots(figsize=(8, 4))
+            
+            # Scatter plot data asli berdasarkan label kelas
+            colors_p = {0: "#E74C3C", 1: "#2ECC71"} # 0 = Tidak Produktif, 1 = Produktif
+            for label_id in [0, 1]:
+                data_label = repo.df[repo.df["label"] == label_id]
+                ax_p.scatter(
+                    data_label["mood"],
+                    data_label["stres"],
+                    label="Produktif (Data Latih)" if label_id == 1 else "Tidak Produktif (Data Latih)",
+                    color=colors_p[label_id],
+                    alpha=0.6,
+                    edgecolors="white",
+                    s=60
+                )
+            
+            # Hitung decision boundary line: w_mood * mood + w_stres * stres + Const = 0
+            # Const = bias + sum_{j != mood, stres} (w_j * x_j)
+            w = perceptron.weights
+            b = perceptron.bias
+            x_val = data_baru_clipped[0]
+            
+            # index 0: tidur, 1: mood, 2: stres, 3: belajar, 4: hp, 5: tugas
+            const_val = b + w[0]*x_val[0] + w[3]*x_val[3] + w[4]*x_val[4] + w[5]*x_val[5]
+            
+            # Ambil rentang mood dari data latih untuk menggambar garis
+            mood_range = np.linspace(repo.nilai_min[1], repo.nilai_max[1], 100)
+            
+            if w[2] != 0:
+                # stres = - (w_mood * mood + const) / w_stres
+                stres_range = - (w[1] * mood_range + const_val) / w[2]
+                
+                # Batasi stres_range agar tidak melenceng terlalu jauh dari plot
+                ax_p.plot(mood_range, stres_range, color="#34495E", linestyle="--", linewidth=2.5, label="Garis Pemisah Perceptron")
+            elif w[1] != 0:
+                # Vertical line: mood = - const / w_mood
+                mood_c = - const_val / w[1]
+                ax_p.axvline(x=mood_c, color="#34495E", linestyle="--", linewidth=2.5, label="Garis Pemisah Perceptron")
+                
+            # Plot data baru
+            ax_p.scatter(
+                mood,
+                stres,
+                color="#F1C40F",
+                edgecolors="black",
+                s=250,
+                marker="*",
+                label="Data Baru Anda",
+                zorder=5
+            )
+            
+            ax_p.set_xlabel("Mood Pagi")
+            ax_p.set_ylabel("Tingkat Stres")
+            ax_p.legend()
+            ax_p.grid(True, alpha=0.3)
+            ax_p.set_ylim(0, 11) # Rentang wajar tingkat stres
+            st.pyplot(fig_p)
 
         with tab3:
             st.write("##### Jarak Euclidean ke Centroid SOM")
