@@ -12,11 +12,9 @@ def render(repo, perceptron):
 
     st.subheader("Kurva Penurunan Error per Epoch")
     fig, ax = plt.subplots(figsize=(10, 4.5))
-    
     # Modern premium dark console style
     fig.patch.set_facecolor('#0F172A')
     ax.set_facecolor('#1E293B')
-    
     epochs = range(1, len(perceptron.errors) + 1)
     ax.plot(
         epochs,
@@ -30,11 +28,9 @@ def render(repo, perceptron):
         markeredgewidth=1.5,
         label="Total Error"
     )
-    
     ax.set_xlabel("Epoch", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
     ax.set_ylabel("Total Error", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
     ax.set_title("Kurva Penurunan Error Perceptron", fontsize=12, fontweight='bold', color='#F8FAFC', pad=15)
-    
     # Grid and spines configuration
     ax.grid(True, linestyle="--", alpha=0.15, color="#94A3B8")
     ax.spines['top'].set_visible(False)
@@ -42,7 +38,6 @@ def render(repo, perceptron):
     ax.spines['left'].set_color('#334155')
     ax.spines['bottom'].set_color('#334155')
     ax.tick_params(colors='#94A3B8', labelsize=9)
-    
     st.pyplot(fig)
 
     st.divider()
