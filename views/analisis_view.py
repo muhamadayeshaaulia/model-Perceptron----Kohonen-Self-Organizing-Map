@@ -88,7 +88,7 @@ def render(repo, perceptron, som):
         st.divider()
         st.subheader("🔍 Detail Matematis & Validasi Model")
 
-        tab1, tab2, tab3 = st.tabs(["📊 Diagram Posisi Data", "🧠 Bobot & Bias Perceptron", "🧩 Validasi Cluster Kohonen (SOM)"])
+        tab1, tab2, tab3 = st.tabs(["📊 Diagram Kohonen (SOM)", "🧠 Bobot & Bias Perceptron", "🧩 Validasi Jarak Kohonen"])
 
         with tab1:
             st.write("##### Posisi Data Baru pada Pembagian Cluster (Mood vs Stres)")

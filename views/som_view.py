@@ -66,6 +66,7 @@ def render(repo, som):
     colors = ["#E74C3C", "#3498DB", "#2ECC71"]
     fig, ax = plt.subplots(figsize=(8, 5))
 
+    # 1. Plot seluruh data latih
     for idx, cluster_id in enumerate(np.unique(clusters)):
         data_cluster = df_cluster[df_cluster["cluster"] == cluster_id]
         ax.scatter(
@@ -73,14 +74,45 @@ def render(repo, som):
             data_cluster["stres"],
             label=som.get_cluster_name(cluster_id),
             color=colors[idx % len(colors)],
-            alpha=0.8,
+            alpha=0.6,
             edgecolors="white",
             s=80
         )
 
+    # 2. Plot Centroid Kohonen (Pusat Cluster / Bobot Model)
+    for idx, w in enumerate(som.weights):
+        # Denormalisasi bobot mood (index 1) dan stres (index 2) ke skala asli
+        mood_c = w[1] * (repo.nilai_max[1] - repo.nilai_min[1]) + repo.nilai_min[1]
+        stres_c = w[2] * (repo.nilai_max[2] - repo.nilai_min[2]) + repo.nilai_min[2]
+        ax.scatter(
+            mood_c,
+            stres_c,
+            color=colors[idx % len(colors)],
+            edgecolors="black",
+            s=220,
+            marker="X",
+            linewidths=2,
+            label=f"Pusat Centroid: {som.get_cluster_name(idx)}",
+            zorder=4
+        )
+
+    # 3. Plot data baris terpilih dari dropdown
+    selected_mood = repo.df.iloc[row_idx]["mood"]
+    selected_stres = repo.df.iloc[row_idx]["stres"]
+    ax.scatter(
+        selected_mood,
+        selected_stres,
+        color="#F1C40F",
+        edgecolors="black",
+        s=250,
+        marker="*",
+        label=f"Data Baris Terpilih ({row_idx + 1})",
+        zorder=5
+    )
+
     ax.set_xlabel("Mood")
     ax.set_ylabel("Stres")
-    ax.set_title("Visualisasi Cluster Kohonen (SOM)")
+    ax.set_title("Visualisasi Pembagian Cluster Kohonen (SOM) & Centroid")
     ax.legend()
     ax.grid(True, alpha=0.3)
     st.pyplot(fig)
