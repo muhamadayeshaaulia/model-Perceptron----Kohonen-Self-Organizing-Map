@@ -11,3 +11,7 @@
     ```python
     pip install numpy pandas matplotlib streamlit
     ```
+## 3 . Membuat beberapa kebutuhan file
+    ```python
+    touch app.py dataset.csv perceptron.py som.py helper.py README.md
+    ```
