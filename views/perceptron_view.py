@@ -62,8 +62,8 @@ def render(repo, perceptron):
 
     # Dropdown select box
     row_idx = st.selectbox(
-        "Pilih Baris Data Latih:", 
-        options=range(len(repo.df)), 
+        "Pilih Baris Data Latih:",
+        options=range(len(repo.df)),
         format_func=lambda i: f"Baris {i+1} (Tidur: {repo.df.iloc[i]['jam_tidur']}, Mood: {repo.df.iloc[i]['mood']}, Stres: {repo.df.iloc[i]['stres']}, Belajar: {repo.df.iloc[i]['jam_belajar']}, HP: {repo.df.iloc[i]['jam_hp']}, Tugas: {repo.df.iloc[i]['jumlah_tugas']} | Label: {'Produktif' if repo.df.iloc[i]['label'] == 1 else 'Tidak Produktif'})"
     )
 
@@ -96,12 +96,10 @@ def render(repo, perceptron):
     with st.expander("🔍 Rincian Perhitungan Matematika (Kombinasi Linear & Aktivasi)"):
         st.markdown("**1. Rumus Net Input (Kombinasi Linear):**")
         st.latex(r"y_{in} = \sum_{i=1}^6 x_i w_i + b")
-        
         st.markdown("**2. Substitusi Nilai Fitur & Bobot Akhir:**")
         langkah_perkalian = " + ".join([f"({data_raw[i]:.1f} \\times {bobot[i]:.4f})" for i in range(len(bobot))])
         st.latex(rf"y_{{in}} = {langkah_perkalian} + ({bias:.4f})")
         st.latex(rf"y_{{in}} = {np.sum(kontribusi):.4f} + ({bias:.4f}) = {net_input:.4f}")
-        
         st.markdown("**3. Aplikasi Fungsi Aktivasi (Step Function):**")
         st.latex(r"y = f(y_{in}) = \begin{cases} 1 & \text{jika } y_{in} \ge 0 \\ 0 & \text{jika } y_{in} < 0 \end{cases}")
         status_aktivasi = "\\ge 0" if net_input >= 0 else "< 0"

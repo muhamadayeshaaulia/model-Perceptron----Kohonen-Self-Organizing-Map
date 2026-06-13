@@ -6,7 +6,7 @@ from models.som import KohonenSOM
 
 @st.cache_resource
 def load_model():
-    """Load dataset dan training model. Di-cache agar tidak diulang tiap page load."""
+    """Load dataset dan training model JST (dengan perbaikan inisialisasi bobot & penamaan klaster)."""
     repo = DatasetRepository().load()
 
     perceptron = Perceptron(learning_rate=0.1, epoch=50)

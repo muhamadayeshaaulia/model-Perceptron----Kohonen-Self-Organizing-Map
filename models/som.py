@@ -11,11 +11,10 @@ class KohonenSOM:
         self.cluster_names = {}
 
     def fit(self, X):
-        jumlah_fitur = X.shape[1]
-
-        # Inisialisasi bobot random untuk setiap cluster
+        # Inisialisasi bobot menggunakan sampel data latih asli (mencegah dead neuron)
         np.random.seed(42)
-        self.weights = np.random.rand(self.jumlah_cluster, jumlah_fitur)
+        indices = np.random.choice(len(X), self.jumlah_cluster, replace=False)
+        self.weights = X[indices].copy()
 
         for _ in range(self.epoch):
             for data in X:
@@ -27,19 +26,30 @@ class KohonenSOM:
 
     def set_cluster_names(self):
         """
-        Urutan fitur:
-        0 = jam_tidur, 1 = mood, 2 = stres,
-        3 = jam_belajar, 4 = jam_hp, 5 = jumlah_tugas
+        Menentukan label klaster secara dinamis dan akurat:
+        1. Klaster dengan bobot stres (indeks 2) tertinggi didefinisikan sebagai Burnout.
+        2. Dari 2 klaster tersisa, klaster dengan bobot jam belajar (indeks 3) tertinggi
+           didefinisikan sebagai Produktif, sedangkan yang lainnya sebagai Santai.
         """
-        scores = []
-        for i, w in enumerate(self.weights):
-            score = w[0] + w[1] + w[3] - w[2] - w[4] - w[5]
-            scores.append((i, score))
-
-        sorted_scores = sorted(scores, key=lambda x: x[1])
-        self.cluster_names[sorted_scores[0][0]] = "Burnout"
-        self.cluster_names[sorted_scores[1][0]] = "Santai"
-        self.cluster_names[sorted_scores[2][0]] = "Produktif"
+        # Cari klaster Burnout (bobot stres tertinggi)
+        stres_weights = [w[2] for w in self.weights]
+        burnout_idx = int(np.argmax(stres_weights))
+        
+        # Dapatkan indeks 2 klaster lainnya
+        remaining_indices = [i for i in range(self.jumlah_cluster) if i != burnout_idx]
+        idx_a, idx_b = remaining_indices
+        
+        # Bandingkan bobot jam belajar (indeks 3)
+        if self.weights[idx_a][3] > self.weights[idx_b][3]:
+            produktif_idx = idx_a
+            santai_idx = idx_b
+        else:
+            produktif_idx = idx_b
+            santai_idx = idx_a
+            
+        self.cluster_names[burnout_idx] = "Burnout"
+        self.cluster_names[santai_idx] = "Santai"
+        self.cluster_names[produktif_idx] = "Produktif"
 
     def predict_one(self, x):
         distances = np.linalg.norm(self.weights - x, axis=1)

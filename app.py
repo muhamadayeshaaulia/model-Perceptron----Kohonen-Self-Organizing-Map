@@ -1,4 +1,5 @@
 import streamlit as st
+import numpy as np
 from services.model_service import load_model
 from utils.styles import apply_custom_styles
 
@@ -67,11 +68,30 @@ st.divider()
 
 repo, perceptron, som = load_model()
 
-st.subheader("📋 Ringkasan Data Latih")
-c1, c2, c3 = st.columns(3)
-c1.metric("Total Sampel Data", f"{len(repo.df)} Baris")
-c2.metric("Kategori Produktif (Label 1)", f"{int((repo.y == 1).sum())} Mahasiswa")
-c3.metric("Kategori Tidak Produktif (Label 0)", f"{int((repo.y == 0).sum())} Mahasiswa")
+# Hitung jumlah anggota klaster SOM secara dinamis
+clusters = som.predict(repo.X_norm)
+nama_klaster = [som.get_cluster_name(c) for c in clusters]
+count_produktif = nama_klaster.count("Produktif")
+count_santai = nama_klaster.count("Santai")
+count_burnout = nama_klaster.count("Burnout")
+
+col_summary_1, col_summary_2 = st.columns(2)
+
+with col_summary_1:
+    st.subheader("📋 Label Target Dataset (Perceptron)")
+    st.caption("Digunakan untuk model klasifikasi terbimbing Perceptron")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Total Data", f"{len(repo.df)} Baris")
+    c2.metric("Produktif (Label 1)", f"{int((repo.y == 1).sum())}")
+    c3.metric("Tidak Produktif (Label 0)", f"{int((repo.y == 0).sum())}")
+
+with col_summary_2:
+    st.subheader("🧩 Hasil Clustering JST (Kohonen SOM)")
+    st.caption("Dikelompokkan secara unsupervised oleh jaringan Kohonen")
+    cc1, cc2, cc3 = st.columns(3)
+    cc1.metric("Klaster Produktif", f"{count_produktif}")
+    cc2.metric("Klaster Santai", f"{count_santai}")
+    cc3.metric("Klaster Burnout", f"{count_burnout}")
 
 st.divider()
 st.markdown(
