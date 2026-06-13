@@ -82,6 +82,10 @@ def render(repo, perceptron, som):
         is_disabled = any_out_of_bounds or len(pesan_inconsistent) > 0
 
     if st.button("🔍 Analisis Sekarang", use_container_width=True, disabled=is_disabled):
+        # Cast agar type checker (Pyrefly) tahu nilai ini tidak None saat analisis berjalan
+        mood_val = float(mood) if mood is not None else 0.0
+        stres_val = float(stres) if stres is not None else 0.0
+
         # Batasi input baru agar tidak melebihi rentang data latih (mencegah error/bias matematis)
         data_baru_clipped = np.clip(data_baru, repo.nilai_min, repo.nilai_max)
 
@@ -154,8 +158,8 @@ def render(repo, perceptron, som):
             
             # Plot data baru
             ax.scatter(
-                mood,
-                stres,
+                mood_val,
+                stres_val,
                 color="#F1C40F",
                 edgecolors="black",
                 s=250,
@@ -240,8 +244,8 @@ def render(repo, perceptron, som):
                 
             # Plot data baru
             ax_p.scatter(
-                mood,
-                stres,
+                mood_val,
+                stres_val,
                 color="#F1C40F",
                 edgecolors="black",
                 s=250,
