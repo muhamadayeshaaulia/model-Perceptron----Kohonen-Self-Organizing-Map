@@ -8,6 +8,18 @@ def apply_custom_styles():
         /* Import Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
+        /* Define theme variables on :root to ensure they propagate into React Portals (like mobile sidebar drawer) */
+        :root {
+            --background-color: #ffffff;
+            --secondary-background-color: #f1f5f9;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --background-color: #0f172a;
+                --secondary-background-color: #1e293b;
+            }
+        }
+
         /* Terapkan font secara global, biarkan warna teks diatur secara alami oleh tema Streamlit */
         html, body, [class*="css"], .stApp {
             font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif !important;
@@ -27,6 +39,7 @@ def apply_custom_styles():
 
         /* Sidebar Styling (Solid & Adaptif) */
         section[data-testid="stSidebar"] {
+            background-color: var(--secondary-background-color) !important;
             border-right: 1px solid rgba(128, 128, 128, 0.15) !important;
         }
 
