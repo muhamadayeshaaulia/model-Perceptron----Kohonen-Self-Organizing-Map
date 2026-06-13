@@ -10,8 +10,9 @@ def normalisasi(X):
 
 
 def normalisasi_data_baru(data_baru, nilai_min, nilai_max):
-    """Normalisasi data input baru menggunakan parameter min/max dari data latih."""
-    return (data_baru - nilai_min) / (nilai_max - nilai_min)
+    """Normalisasi data input baru menggunakan parameter min/max dari data latih dengan batasan [0, 1]."""
+    norm_data = (data_baru - nilai_min) / (nilai_max - nilai_min)
+    return np.clip(norm_data, 0.0, 1.0)
 
 
 def get_saran(hasil_perceptron, hasil_som):
