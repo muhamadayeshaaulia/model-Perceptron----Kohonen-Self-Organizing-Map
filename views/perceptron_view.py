@@ -34,25 +34,25 @@ def render(repo, perceptron):
 
     st.divider()
     st.subheader("📖 Teori & Rumus Perhitungan Perceptron")
-    
+
     st.markdown(f"""
     Model JST Perceptron adalah algoritma *Supervised Learning* yang digunakan untuk klasifikasi biner. Selama proses training, bobot ($w$) dan bias ($b$) diperbarui terus-menerus menggunakan rumus berikut:
-    
+
     ##### 1. Persamaan Net Input (Kombinasi Linear)
     $$y_{{in}} = \\sum_{{i=1}}^n x_i w_i + b$$
-    
+
     ##### 2. Fungsi Aktivasi (Undak Biner / Step Function)
     $$y = f(y_{{in}}) = \\begin{{cases}} 1 & \\text{{jika }} y_{{in}} \\ge 0 \\\\ 0 & \\text{{jika }} y_{{in}} < 0 \\end{{cases}}$$
-    
+
     ##### 3. Rumus Pembaruan Bobot dan Bias (Delta Rule)
     Jika terdapat error ($e = y_{{\\text{{target}}}} - y_{{\\text{{prediksi}}}}$) antara target dan prediksi:
     $$\\Delta w_i = \\alpha \\times e \\times x_i$$
     $$\\Delta b = \\alpha \\times e$$
-    
+
     Setelah delta dihitung, bobot dan bias baru diperbarui dengan:
     $$w_i \\leftarrow w_i + \\Delta w_i$$
     $$b \\leftarrow b + \\Delta b$$
-    
+
     *Keterangan:*
     *   $x_i$: Nilai fitur ke-$i$ (Jam Tidur, Mood, Stres, Belajar, HP, Tugas)
     *   $w_i$: Bobot fitur ke-$i$ (Bobot akhir ditampilkan pada tabel di atas)

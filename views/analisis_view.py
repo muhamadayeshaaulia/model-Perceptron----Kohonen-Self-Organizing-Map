@@ -12,51 +12,74 @@ def render(repo, perceptron, som):
 
     col1, col2 = st.columns(2)
     with col1:
-        jam_tidur    = st.number_input("🛌 Jam Tidur (3–8 jam)", value=7, step=1)
-        if jam_tidur < repo.nilai_min[0] or jam_tidur > repo.nilai_max[0]:
-            st.markdown(f"<p style='color: #E65100; margin-top: -15px; font-size: 0.85rem;'>⚠️ Di luar batas data latih ({int(repo.nilai_min[0])} - {int(repo.nilai_max[0])})</p>", unsafe_allow_html=True)
-        mood         = st.number_input("😊 Mood Pagi (3–9)", value=7, step=1)
-        if mood < repo.nilai_min[1] or mood > repo.nilai_max[1]:
-            st.markdown(f"<p style='color: #E65100; margin-top: -15px; font-size: 0.85rem;'>⚠️ Di luar batas data latih ({int(repo.nilai_min[1])} - {int(repo.nilai_max[1])})</p>", unsafe_allow_html=True)
-        stres        = st.number_input("😤 Tingkat Stres (1–10)", value=4, step=1)
-        if stres < repo.nilai_min[2] or stres > repo.nilai_max[2]:
-            st.markdown(f"<p style='color: #E65100; margin-top: -15px; font-size: 0.85rem;'>⚠️ Di luar batas data latih ({int(repo.nilai_min[2])} - {int(repo.nilai_max[2])})</p>", unsafe_allow_html=True)
+        jam_tidur    = st.number_input("🛌 Jam Tidur (3–8 jam)", value=None, step=1)
+        if jam_tidur is not None:
+            if jam_tidur < repo.nilai_min[0] or jam_tidur > repo.nilai_max[0]:
+                st.markdown(f"<p style='color: #E65100; margin-top: -15px; font-size: 0.85rem;'>⚠️ Di luar batas data latih ({int(repo.nilai_min[0])} - {int(repo.nilai_max[0])})</p>", unsafe_allow_html=True)
+        mood         = st.number_input("😊 Mood Pagi (3–9)", value=None, step=1)
+        if mood is not None:
+            if mood < repo.nilai_min[1] or mood > repo.nilai_max[1]:
+                st.markdown(f"<p style='color: #E65100; margin-top: -15px; font-size: 0.85rem;'>⚠️ Di luar batas data latih ({int(repo.nilai_min[1])} - {int(repo.nilai_max[1])})</p>", unsafe_allow_html=True)
+        stres        = st.number_input("😤 Tingkat Stres (1–10)", value=None, step=1)
+        if stres is not None:
+            if stres < repo.nilai_min[2] or stres > repo.nilai_max[2]:
+                st.markdown(f"<p style='color: #E65100; margin-top: -15px; font-size: 0.85rem;'>⚠️ Di luar batas data latih ({int(repo.nilai_min[2])} - {int(repo.nilai_max[2])})</p>", unsafe_allow_html=True)
 
     with col2:
-        jam_belajar  = st.number_input("📚 Jam Belajar (1–6 jam)", value=4, step=1)
-        if jam_belajar < repo.nilai_min[3] or jam_belajar > repo.nilai_max[3]:
-            st.markdown(f"<p style='color: #E65100; margin-top: -15px; font-size: 0.85rem;'>⚠️ Di luar batas data latih ({int(repo.nilai_min[3])} - {int(repo.nilai_max[3])})</p>", unsafe_allow_html=True)
-        jam_hp       = st.number_input("📱 Jam Main HP (1–9 jam)", value=3, step=1)
-        if jam_hp < repo.nilai_min[4] or jam_hp > repo.nilai_max[4]:
-            st.markdown(f"<p style='color: #E65100; margin-top: -15px; font-size: 0.85rem;'>⚠️ Di luar batas data latih ({int(repo.nilai_min[4])} - {int(repo.nilai_max[4])})</p>", unsafe_allow_html=True)
-        jumlah_tugas = st.number_input("📝 Jumlah Tugas (1–8)", value=2, step=1)
-        if jumlah_tugas < repo.nilai_min[5] or jumlah_tugas > repo.nilai_max[5]:
-            st.markdown(f"<p style='color: #E65100; margin-top: -15px; font-size: 0.85rem;'>⚠️ Di luar batas data latih ({int(repo.nilai_min[5])} - {int(repo.nilai_max[5])})</p>", unsafe_allow_html=True)
+        jam_belajar  = st.number_input("📚 Jam Belajar (1–6 jam)", value=None, step=1)
+        if jam_belajar is not None:
+            if jam_belajar < repo.nilai_min[3] or jam_belajar > repo.nilai_max[3]:
+                st.markdown(f"<p style='color: #E65100; margin-top: -15px; font-size: 0.85rem;'>⚠️ Di luar batas data latih ({int(repo.nilai_min[3])} - {int(repo.nilai_max[3])})</p>", unsafe_allow_html=True)
+        jam_hp       = st.number_input("📱 Jam Main HP (1–9 jam)", value=None, step=1)
+        if jam_hp is not None:
+            if jam_hp < repo.nilai_min[4] or jam_hp > repo.nilai_max[4]:
+                st.markdown(f"<p style='color: #E65100; margin-top: -15px; font-size: 0.85rem;'>⚠️ Di luar batas data latih ({int(repo.nilai_min[4])} - {int(repo.nilai_max[4])})</p>", unsafe_allow_html=True)
+        jumlah_tugas = st.number_input("📝 Jumlah Tugas (1–8)", value=None, step=1)
+        if jumlah_tugas is not None:
+            if jumlah_tugas < repo.nilai_min[5] or jumlah_tugas > repo.nilai_max[5]:
+                st.markdown(f"<p style='color: #E65100; margin-top: -15px; font-size: 0.85rem;'>⚠️ Di luar batas data latih ({int(repo.nilai_min[5])} - {int(repo.nilai_max[5])})</p>", unsafe_allow_html=True)
 
-    any_out_of_bounds = (
-        jam_tidur < repo.nilai_min[0] or jam_tidur > repo.nilai_max[0] or
-        mood < repo.nilai_min[1] or mood > repo.nilai_max[1] or
-        stres < repo.nilai_min[2] or stres > repo.nilai_max[2] or
-        jam_belajar < repo.nilai_min[3] or jam_belajar > repo.nilai_max[3] or
-        jam_hp < repo.nilai_min[4] or jam_hp > repo.nilai_max[4] or
-        jumlah_tugas < repo.nilai_min[5] or jumlah_tugas > repo.nilai_max[5]
+    # Cek apakah ada inputan yang kosong
+    ada_yang_kosong = (
+        jam_tidur is None or 
+        mood is None or 
+        stres is None or 
+        jam_belajar is None or 
+        jam_hp is None or 
+        jumlah_tugas is None
     )
 
-    pesan_inconsistent = cek_konsistensi(jam_tidur, mood, stres, jam_belajar, jam_hp, jumlah_tugas)
+    if ada_yang_kosong:
+        st.info("💡 **Silakan isi semua data harian di atas untuk memulai analisis.**")
+        any_out_of_bounds = False
+        pesan_inconsistent = []
+        is_disabled = True
+        data_baru = np.zeros((1, 6))
+    else:
+        any_out_of_bounds = (
+            jam_tidur < repo.nilai_min[0] or jam_tidur > repo.nilai_max[0] or
+            mood < repo.nilai_min[1] or mood > repo.nilai_max[1] or
+            stres < repo.nilai_min[2] or stres > repo.nilai_max[2] or
+            jam_belajar < repo.nilai_min[3] or jam_belajar > repo.nilai_max[3] or
+            jam_hp < repo.nilai_min[4] or jam_hp > repo.nilai_max[4] or
+            jumlah_tugas < repo.nilai_min[5] or jumlah_tugas > repo.nilai_max[5]
+        )
 
-    if any_out_of_bounds:
-        st.error("❌ Analisis tidak dapat dilakukan karena ada input di luar batas data latih. Silakan sesuaikan nilai input Anda.")
-    elif pesan_inconsistent:
-        st.error("❌ **Data Input Tidak Konsisten!** Silakan sesuaikan kembali input Anda agar logis:")
-        for p in pesan_inconsistent:
-            st.markdown(f"- {p}")
+        pesan_inconsistent = cek_konsistensi(jam_tidur, mood, stres, jam_belajar, jam_hp, jumlah_tugas)
 
-    data_baru = np.array(
-        [[jam_tidur, mood, stres, jam_belajar, jam_hp, jumlah_tugas]],
-        dtype=float
-    )
+        if any_out_of_bounds:
+            st.error("❌ Analisis tidak dapat dilakukan karena ada input di luar batas data latih. Silakan sesuaikan nilai input Anda.")
+        elif pesan_inconsistent:
+            st.error("❌ **Data Input Tidak Konsisten!** Silakan sesuaikan kembali input Anda agar logis:")
+            for p in pesan_inconsistent:
+                st.markdown(f"- {p}")
 
-    is_disabled = any_out_of_bounds or len(pesan_inconsistent) > 0
+        data_baru = np.array(
+            [[jam_tidur, mood, stres, jam_belajar, jam_hp, jumlah_tugas]],
+            dtype=float
+        )
+
+        is_disabled = any_out_of_bounds or len(pesan_inconsistent) > 0
 
     if st.button("🔍 Analisis Sekarang", use_container_width=True, disabled=is_disabled):
         # Batasi input baru agar tidak melebihi rentang data latih (mencegah error/bias matematis)
