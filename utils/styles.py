@@ -25,9 +25,15 @@ def apply_custom_styles():
             max-width: 1200px !important;
         }
 
-        /* Sidebar Styling (Adaptif) */
-        section[data-testid="stSidebar"] {
+        /* Sidebar Styling (Solid & Adaptif) */
+        section[data-testid="stSidebar"], 
+        section[data-testid="stSidebar"] > div {
             background-color: var(--secondary-background-color) !important;
+            opacity: 1 !important;
+            backdrop-filter: none !important;
+        }
+        
+        section[data-testid="stSidebar"] {
             border-right: 1px solid rgba(128, 128, 128, 0.15) !important;
         }
         
