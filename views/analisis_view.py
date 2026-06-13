@@ -154,6 +154,7 @@ def render(repo, perceptron, som):
         with tab3:
             st.write("##### Jarak Euclidean ke Centroid SOM")
             distances = np.linalg.norm(som.weights - data_baru_norm, axis=1)
+            
             df_som_val = pd.DataFrame({
                 "Nama Cluster": [som.get_cluster_name(i) for i in range(len(som.weights))],
                 "Jarak Euclidean ke Centroid": distances,
@@ -161,3 +162,8 @@ def render(repo, perceptron, som):
             })
             st.dataframe(df_som_val, width="stretch")
             st.write("*Catatan: SOM mengklasifikasikan input ke cluster dengan jarak Euclidean terkecil.*")
+
+            st.write("##### Bobot Centroid (Pusat Koordinat) Masing-Masing Cluster SOM")
+            bobot_som = pd.DataFrame(som.weights, columns=repo.fitur)
+            bobot_som.insert(0, "Cluster", [som.get_cluster_name(i) for i in range(len(som.weights))])
+            st.dataframe(bobot_som, width="stretch")
