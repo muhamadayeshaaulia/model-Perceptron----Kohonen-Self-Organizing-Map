@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 def render(repo, perceptron, som):
     """Render halaman input & analisis produktivitas mahasiswa."""
     st.header("📌 Input Data Harian Mahasiswa")
-    st.write("Masukkan data aktivitas harian kamu untuk dianalisis oleh Perceptron dan SOM.")
+    st.write("Masukkan data aktivitas harian kamu untuk dianalisis oleh Perceptron dan Kohonen (SOM).")
 
     col1, col2 = st.columns(2)
     with col1:
@@ -66,7 +66,7 @@ def render(repo, perceptron, som):
         hasil_p = perceptron.predict(data_baru_clipped)[0]
         hasil_perceptron = "Produktif" if hasil_p == 1 else "Tidak Produktif"
 
-        # Prediksi SOM
+        # Prediksi Kohonen (SOM)
         data_baru_norm = normalisasi_data_baru(data_baru_clipped, repo.nilai_min, repo.nilai_max)
         cluster = som.predict(data_baru_norm)[0]
         hasil_som = som.get_cluster_name(cluster)
@@ -78,7 +78,7 @@ def render(repo, perceptron, som):
         with col_h1:
             st.metric("Hasil Perceptron", hasil_perceptron)
         with col_h2:
-            st.metric("Hasil SOM (Cluster)", hasil_som)
+            st.metric("Hasil Kohonen (Cluster)", hasil_som)
 
         st.info(get_saran(hasil_perceptron, hasil_som))
 
@@ -88,7 +88,7 @@ def render(repo, perceptron, som):
         st.divider()
         st.subheader("🔍 Detail Matematis & Validasi Model")
 
-        tab1, tab2, tab3 = st.tabs(["📊 Diagram Posisi Data", "🧠 Bobot & Bias Perceptron", "🧩 Validasi Cluster SOM"])
+        tab1, tab2, tab3 = st.tabs(["📊 Diagram Posisi Data", "🧠 Bobot & Bias Perceptron", "🧩 Validasi Cluster Kohonen (SOM)"])
 
         with tab1:
             st.write("##### Posisi Data Baru pada Pembagian Cluster (Mood vs Stres)")
@@ -112,7 +112,7 @@ def render(repo, perceptron, som):
                     s=60
                 )
             
-            # Plot Centroid SOM (Pusat Cluster / Bobot Model)
+            # Plot Centroid Kohonen (Pusat Cluster / Bobot Model)
             for idx, w in enumerate(som.weights):
                 # Denormalisasi bobot mood (index 1) dan stres (index 2) ke skala asli
                 mood_c = w[1] * (repo.nilai_max[1] - repo.nilai_min[1]) + repo.nilai_min[1]
@@ -164,11 +164,15 @@ def render(repo, perceptron, som):
             
             st.markdown("**Persamaan Linear:**")
             st.latex(rf"\text{{Net Input}} = \sum (\text{{Nilai}} \times \text{{Bobot}}) + \text{{Bias}}")
-            st.latex(rf"\text{{Net Input}} = {total_net_input:.4f}")
             st.markdown(f"**Bias Model**: `{bias:.4f}`")
             
+            st.markdown("**Langkah Perhitungan Manual Perceptron:**")
+            langkah_perkalian = " + ".join([f"({data_baru_clipped[0][i]:.1f} \\times {bobot[i]:.4f})" for i in range(len(bobot))])
+            st.latex(rf"\text{{Net Input}} = {langkah_perkalian} + ({bias:.4f})")
+            st.latex(rf"\text{{Net Input}} = {np.sum(kontribusi):.4f} + ({bias:.4f}) = {total_net_input:.4f}")
+
             status_aktivasi = ">= 0" if total_net_input >= 0 else "< 0"
-            st.markdown(f"**Hasil Aktivasi**: `Net Input {status_aktivasi} \rightarrow` **{hasil_perceptron}**")
+            st.markdown(f"**Hasil Aktivasi**: `Net Input {status_aktivasi} ->` **{hasil_perceptron}**")
 
             st.write("##### Visualisasi Garis Keputusan (Decision Boundary) Perceptron")
             # Plot Mood vs Stres dengan pemisahan kelas Perceptron
@@ -229,9 +233,10 @@ def render(repo, perceptron, som):
             ax_p.grid(True, alpha=0.3)
             ax_p.set_ylim(0, 11) # Rentang wajar tingkat stres
             st.pyplot(fig_p)
+            st.write("*Catatan: Garis pemisah di atas digambar dengan mengasumsikan 4 fitur lainnya (Jam Tidur, Jam Belajar, Jam HP, Jumlah Tugas) bernilai konstan sesuai input baru Anda. Karena data latih lainnya memiliki nilai fitur pendukung yang bervariasi, beberapa titik data latih mungkin terlihat berada di sisi garis yang tidak sesuai dengan warna kelasnya.*")
 
         with tab3:
-            st.write("##### Jarak Euclidean ke Centroid SOM")
+            st.write("##### Jarak Euclidean ke Centroid Kohonen (SOM)")
             distances = np.linalg.norm(som.weights - data_baru_norm, axis=1)
             
             df_som_val = pd.DataFrame({
@@ -240,9 +245,31 @@ def render(repo, perceptron, som):
                 "Status": ["Pemenang (Terdekat) 🏆" if i == cluster else "Bukan Pemenang" for i in range(len(som.weights))]
             })
             st.dataframe(df_som_val, width="stretch")
-            st.write("*Catatan: SOM mengklasifikasikan input ke cluster dengan jarak Euclidean terkecil.*")
+            st.write("*Catatan: Kohonen (SOM) mengklasifikasikan input ke cluster dengan jarak Euclidean terkecil.*")
 
-            st.write("##### Bobot Centroid (Pusat Koordinat) Masing-Masing Cluster SOM")
+            st.write("##### Langkah Perhitungan Manual Jarak Euclidean (Kohonen SOM)")
+            st.markdown("Rumus: $d = \\sqrt{\\sum_{j=1}^6 (x_j - w_j)^2}$")
+            
+            # data baru ter-normalisasi
+            x_norm = data_baru_norm[0]
+            
+            for i in range(len(som.weights)):
+                cluster_name = som.get_cluster_name(i)
+                w_c = som.weights[i]
+                
+                # Hitung selisih kuadrat per fitur
+                selisih_kuadrat = [(x_norm[j] - w_c[j])**2 for j in range(6)]
+                langkah_sum = " + ".join([f"({x_norm[j]:.4f} - {w_c[j]:.4f})^2" for j in range(6)])
+                langkah_num = " + ".join([f"{s:.4f}" for s in selisih_kuadrat])
+                total_sum = sum(selisih_kuadrat)
+                
+                with st.expander(f"🔍 Langkah Perhitungan ke Cluster {cluster_name}"):
+                    st.markdown(f"**Jarak ke Centroid {cluster_name}:**")
+                    st.latex(rf"d_{{\text{{{cluster_name}}}}} = \sqrt{{{langkah_sum}}}")
+                    st.latex(rf"d_{{\text{{{cluster_name}}}}} = \sqrt{{{langkah_num}}}")
+                    st.latex(rf"d_{{\text{{{cluster_name}}}}} = \sqrt{{{total_sum:.4f}}} = {np.sqrt(total_sum):.4f}")
+
+            st.write("##### Bobot Centroid (Pusat Koordinat) Masing-Masing Cluster Kohonen (SOM)")
             bobot_som = pd.DataFrame(som.weights, columns=repo.fitur)
             bobot_som.insert(0, "Cluster", [som.get_cluster_name(i) for i in range(len(som.weights))])
             st.dataframe(bobot_som, width="stretch")
