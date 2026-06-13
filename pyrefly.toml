@@ -1,0 +1,4 @@
+# Pyrefly configuration
+# Arahkan ke Python interpreter di venv agar import tidak merah
+
+python_interpreter = "venv/bin/python"
