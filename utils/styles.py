@@ -26,19 +26,8 @@ def apply_custom_styles():
         }
 
         /* Sidebar Styling (Solid & Adaptif) */
-        section[data-testid="stSidebar"], 
-        section[data-testid="stSidebar"] > div {
-            background-color: var(--secondary-background-color) !important;
-            opacity: 1 !important;
-            backdrop-filter: none !important;
-        }
-        
         section[data-testid="stSidebar"] {
             border-right: 1px solid rgba(128, 128, 128, 0.15) !important;
-        }
-        
-        section[data-testid="stSidebar"] [data-testid="stSidebarNav"] {
-            background-color: var(--secondary-background-color) !important;
         }
 
         /* Header Style dengan Font Kustom */
