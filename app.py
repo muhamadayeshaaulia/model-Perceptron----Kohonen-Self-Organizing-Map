@@ -1,5 +1,5 @@
 import streamlit as st
-from model import load_model
+from services.model_service import load_model
 
 st.set_page_config(
     page_title="Deteksi Produktivitas Mahasiswa",
@@ -25,13 +25,12 @@ with col3:
 
 st.divider()
 
-# Ringkasan dataset
-df, fitur, X, y, X_norm, nilai_min, nilai_max, perceptron, som = load_model()
+repo, perceptron, som = load_model()
 
 st.subheader("📋 Ringkasan Data")
 c1, c2, c3 = st.columns(3)
-c1.metric("Total Data", len(df))
-c2.metric("Produktif", int((y == 1).sum()))
-c3.metric("Tidak Produktif", int((y == 0).sum()))
+c1.metric("Total Data", len(repo.df))
+c2.metric("Produktif", int((repo.y == 1).sum()))
+c3.metric("Tidak Produktif", int((repo.y == 0).sum()))
 
 st.write("👈 Pilih halaman dari **sidebar kiri** untuk mulai.")
