@@ -2,11 +2,13 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from utils.helper import normalisasi_data_baru, get_saran, cek_konsistensi
+from utils.styles import apply_custom_styles
 import matplotlib.pyplot as plt
 
 
 def render(repo, perceptron, som):
     """Render halaman input & analisis produktivitas mahasiswa."""
+    apply_custom_styles()
     st.header("📌 Input Data Harian Mahasiswa")
     st.write("Masukkan data aktivitas harian kamu untuk dianalisis oleh Perceptron dan Kohonen (SOM).")
 
@@ -119,8 +121,12 @@ def render(repo, perceptron, som):
 
         with tab1:
             st.write("##### Posisi Data Baru pada Pembagian Cluster (Mood vs Stres)")
-            fig, ax = plt.subplots(figsize=(8, 4))
-            colors = ["#E74C3C", "#3498DB", "#2ECC71"]
+            fig, ax = plt.subplots(figsize=(8.5, 4.5))
+            
+            # Modern premium dark console style
+            fig.patch.set_facecolor('#0F172A')
+            ax.set_facecolor('#1E293B')
+            colors = ["#F87171", "#60A5FA", "#34D399"] # Glowing coral, bright blue, emerald green
             
             # Ambil cluster dari data latih
             clusters_train = som.predict(repo.X_norm)
@@ -134,9 +140,11 @@ def render(repo, perceptron, som):
                     data_cluster["stres"],
                     label=som.get_cluster_name(cluster_id),
                     color=colors[idx % len(colors)],
-                    alpha=0.6,
-                    edgecolors="white",
-                    s=60
+                    alpha=0.8,
+                    edgecolors="#1E293B",
+                    linewidths=0.7,
+                    s=80,
+                    zorder=3
                 )
             
             # Plot Centroid Kohonen (Pusat Cluster / Bobot Model)
@@ -148,7 +156,7 @@ def render(repo, perceptron, som):
                     mood_c,
                     stres_c,
                     color=colors[idx % len(colors)],
-                    edgecolors="black",
+                    edgecolors="#F8FAFC",
                     s=180,
                     marker="X",
                     linewidths=1.5,
@@ -160,18 +168,24 @@ def render(repo, perceptron, som):
             ax.scatter(
                 mood_val,
                 stres_val,
-                color="#F1C40F",
+                color="#FBBF24", # Gold-yellow glow
                 edgecolors="black",
-                s=250,
+                s=260,
                 marker="*",
+                linewidths=1.2,
                 label="Data Baru Anda",
                 zorder=5
             )
             
-            ax.set_xlabel("Mood Pagi")
-            ax.set_ylabel("Tingkat Stres")
-            ax.legend()
-            ax.grid(True, alpha=0.3)
+            ax.set_xlabel("Mood Pagi", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
+            ax.set_ylabel("Tingkat Stres", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
+            ax.legend(frameon=True, facecolor='#1E293B', edgecolor='#334155', fontsize=9)
+            ax.grid(True, linestyle="--", alpha=0.15, color="#94A3B8")
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['left'].set_color('#334155')
+            ax.spines['bottom'].set_color('#334155')
+            ax.tick_params(colors='#94A3B8', labelsize=9)
             st.pyplot(fig)
 
         with tab2:
@@ -203,10 +217,14 @@ def render(repo, perceptron, som):
 
             st.write("##### Visualisasi Garis Keputusan (Decision Boundary) Perceptron")
             # Plot Mood vs Stres dengan pemisahan kelas Perceptron
-            fig_p, ax_p = plt.subplots(figsize=(8, 4))
+            fig_p, ax_p = plt.subplots(figsize=(8.5, 4.5))
+            
+            # Modern premium dark console style
+            fig_p.patch.set_facecolor('#0F172A')
+            ax_p.set_facecolor('#1E293B')
             
             # Scatter plot data asli berdasarkan label kelas
-            colors_p = {0: "#E74C3C", 1: "#2ECC71"} # 0 = Tidak Produktif, 1 = Produktif
+            colors_p = {0: "#F87171", 1: "#34D399"} # Glowing coral red & emerald green
             for label_id in [0, 1]:
                 data_label = repo.df[repo.df["label"] == label_id]
                 ax_p.scatter(
@@ -214,9 +232,11 @@ def render(repo, perceptron, som):
                     data_label["stres"],
                     label="Produktif (Data Latih)" if label_id == 1 else "Tidak Produktif (Data Latih)",
                     color=colors_p[label_id],
-                    alpha=0.6,
-                    edgecolors="white",
-                    s=60
+                    alpha=0.8,
+                    edgecolors="#1E293B",
+                    linewidths=0.7,
+                    s=80,
+                    zorder=3
                 )
             
             # Hitung decision boundary line: w_mood * mood + w_stres * stres + Const = 0
@@ -236,28 +256,34 @@ def render(repo, perceptron, som):
                 stres_range = - (w[1] * mood_range + const_val) / w[2]
                 
                 # Batasi stres_range agar tidak melenceng terlalu jauh dari plot
-                ax_p.plot(mood_range, stres_range, color="#34495E", linestyle="--", linewidth=2.5, label="Garis Pemisah Perceptron")
+                ax_p.plot(mood_range, stres_range, color="#818CF8", linestyle="--", linewidth=2.5, label="Garis Pemisah Perceptron", zorder=4)
             elif w[1] != 0:
                 # Vertical line: mood = - const / w_mood
                 mood_c = - const_val / w[1]
-                ax_p.axvline(x=mood_c, color="#34495E", linestyle="--", linewidth=2.5, label="Garis Pemisah Perceptron")
+                ax_p.axvline(x=mood_c, color="#818CF8", linestyle="--", linewidth=2.5, label="Garis Pemisah Perceptron", zorder=4)
                 
             # Plot data baru
             ax_p.scatter(
                 mood_val,
                 stres_val,
-                color="#F1C40F",
+                color="#FBBF24", # Gold-yellow glow
                 edgecolors="black",
-                s=250,
+                s=260,
                 marker="*",
+                linewidths=1.2,
                 label="Data Baru Anda",
                 zorder=5
             )
             
-            ax_p.set_xlabel("Mood Pagi")
-            ax_p.set_ylabel("Tingkat Stres")
-            ax_p.legend()
-            ax_p.grid(True, alpha=0.3)
+            ax_p.set_xlabel("Mood Pagi", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
+            ax_p.set_ylabel("Tingkat Stres", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
+            ax_p.legend(frameon=True, facecolor='#1E293B', edgecolor='#334155', fontsize=9)
+            ax_p.grid(True, linestyle="--", alpha=0.15, color="#94A3B8")
+            ax_p.spines['top'].set_visible(False)
+            ax_p.spines['right'].set_visible(False)
+            ax_p.spines['left'].set_color('#334155')
+            ax_p.spines['bottom'].set_color('#334155')
+            ax_p.tick_params(colors='#94A3B8', labelsize=9)
             ax_p.set_ylim(0, 11) # Rentang wajar tingkat stres
             st.pyplot(fig_p)
             st.write("*Catatan: Garis pemisah di atas digambar dengan mengasumsikan 4 fitur lainnya (Jam Tidur, Jam Belajar, Jam HP, Jumlah Tugas) bernilai konstan sesuai input baru Anda. Karena data latih lainnya memiliki nilai fitur pendukung yang bervariasi, beberapa titik data latih mungkin terlihat berada di sisi garis yang tidak sesuai dengan warna kelasnya.*")

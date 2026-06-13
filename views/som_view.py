@@ -2,10 +2,12 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from utils.styles import apply_custom_styles
 
 
 def render(repo, som):
     """Render halaman clustering Kohonen (SOM)."""
+    apply_custom_styles()
     st.header("🧩 Hasil Clustering Kohonen (SOM)")
 
     clusters = som.predict(repo.X_norm)
@@ -13,7 +15,7 @@ def render(repo, som):
     df_cluster["cluster"] = clusters
     df_cluster["nama_cluster"] = [som.get_cluster_name(c) for c in clusters]
 
-    st.subheader("Tabel Hasil Clustering")
+    st.subheader("📋 Tabel Hasil Clustering")
     st.dataframe(df_cluster, width="stretch")
 
     st.write("#### 🔍 Langkah Perhitungan Jarak Euclidean Per Baris Data")
@@ -63,8 +65,12 @@ def render(repo, som):
     st.divider()
 
     st.subheader("Visualisasi Cluster (Mood vs Stres)")
-    colors = ["#E74C3C", "#3498DB", "#2ECC71"]
-    fig, ax = plt.subplots(figsize=(8, 5))
+    fig, ax = plt.subplots(figsize=(9, 5.5))
+    
+    # Modern premium dark console style
+    fig.patch.set_facecolor('#0F172A')
+    ax.set_facecolor('#1E293B')
+    colors = ["#F87171", "#60A5FA", "#34D399"] # Glowing coral red, bright blue, emerald green
 
     # 1. Plot seluruh data latih
     for idx, cluster_id in enumerate(np.unique(clusters)):
@@ -74,9 +80,11 @@ def render(repo, som):
             data_cluster["stres"],
             label=som.get_cluster_name(cluster_id),
             color=colors[idx % len(colors)],
-            alpha=0.6,
-            edgecolors="white",
-            s=80
+            alpha=0.8,
+            edgecolors="#1E293B",
+            linewidths=0.7,
+            s=95,
+            zorder=3
         )
 
     # 2. Plot Centroid Kohonen (Pusat Cluster / Bobot Model)
@@ -88,10 +96,10 @@ def render(repo, som):
             mood_c,
             stres_c,
             color=colors[idx % len(colors)],
-            edgecolors="black",
+            edgecolors="#F8FAFC",
             s=220,
             marker="X",
-            linewidths=2,
+            linewidths=1.5,
             label=f"Pusat Centroid: {som.get_cluster_name(idx)}",
             zorder=4
         )
@@ -102,24 +110,31 @@ def render(repo, som):
     ax.scatter(
         selected_mood,
         selected_stres,
-        color="#F1C40F",
+        color="#FBBF24", # Gold-yellow glow
         edgecolors="black",
-        s=250,
+        s=260,
         marker="*",
+        linewidths=1.2,
         label=f"Data Baris Terpilih ({row_idx + 1})",
         zorder=5
     )
 
-    ax.set_xlabel("Mood")
-    ax.set_ylabel("Stres")
-    ax.set_title("Visualisasi Pembagian Cluster Kohonen (SOM) & Centroid")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
+    ax.set_xlabel("Mood Pagi", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
+    ax.set_ylabel("Tingkat Stres", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
+    ax.set_title("Visualisasi Pembagian Cluster Kohonen (SOM) & Centroid", fontsize=12, fontweight='bold', color='#F8FAFC', pad=15)
+    ax.legend(frameon=True, facecolor='#1E293B', edgecolor='#334155', fontsize=9)
+    ax.tick_params(colors='#94A3B8', labelsize=9)
+    ax.grid(True, linestyle="--", alpha=0.15, color="#94A3B8")
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.spines['left'].set_color('#334155')
+    ax.spines['bottom'].set_color('#334155')
+    
     st.pyplot(fig)
 
     st.divider()
 
-    st.subheader("Bobot Akhir Kohonen (SOM)")
+    st.subheader("⚖️ Bobot Akhir Kohonen (SOM)")
     bobot_som = pd.DataFrame(som.weights, columns=repo.fitur)
     bobot_som.insert(0, "Cluster", [som.get_cluster_name(i) for i in range(len(som.weights))])
     st.dataframe(bobot_som, width="stretch")
@@ -146,3 +161,4 @@ def render(repo, som):
     *   $\\alpha(t)$: *Learning Rate* pada epoch $t$ (pada model ini diatur awal sebesar `{som.learning_rate}`)
     *   $t$: Epoch saat ini (total epoch: `{som.epoch}`)
     """)
+
