@@ -25,3 +25,49 @@ def get_saran(hasil_perceptron, hasil_som):
         return "Kondisi kamu cukup santai. Coba tingkatkan jam belajar sedikit agar produktivitas lebih optimal."
     else:
         return "Kondisi kamu kurang produktif. Perbaiki jam tidur, kurangi stres, dan atur ulang waktu belajar."
+
+
+def cek_konsistensi(jam_tidur, mood, stres, jam_belajar, jam_hp, jumlah_tugas):
+    """
+    Mengecek konsistensi data input berdasarkan logika aktivitas harian dan pola dataset.
+    Mengembalikan list berisi string pesan ketidakkonsistenan. Jika kosong, berarti data konsisten.
+    """
+    pesan = []
+    
+    # 1. Total jam melebihi 24 jam
+    if jam_tidur + jam_belajar + jam_hp > 24:
+        pesan.append(
+            f"Jumlah **Jam Tidur** ({jam_tidur} jam), **Jam Belajar** ({jam_belajar} jam), dan **Jam HP** ({jam_hp} jam) "
+            f"berjumlah **{jam_tidur + jam_belajar + jam_hp} jam**, melebihi total 24 jam dalam sehari. Ini tidak mungkin secara fisik."
+        )
+        
+    # 2. Mood dan Stres kontradiktif (keduanya tinggi)
+    if mood >= 7 and stres >= 7:
+        pesan.append(
+            f"**Mood Pagi** ({mood}) dan **Tingkat Stres** ({stres}) keduanya bernilai tinggi. "
+            "Secara psikologis, mood yang sangat baik biasanya tidak terjadi bersamaan dengan stres yang sangat tinggi."
+        )
+        
+    # 3. Mood dan Stres kontradiktif (keduanya rendah)
+    if mood <= 4 and stres <= 3:
+        pesan.append(
+            f"**Mood Pagi** ({mood}) dan **Tingkat Stres** ({stres}) keduanya bernilai rendah. "
+            "Biasanya, jika mood pagi buruk, tingkat stres cenderung lebih tinggi."
+        )
+        
+    # 4. Jam Belajar dan Jam HP keduanya sangat tinggi
+    if jam_belajar >= 5 and jam_hp >= 7:
+        pesan.append(
+            f"**Jam Belajar** ({jam_belajar} jam) dan **Jam HP** ({jam_hp} jam) keduanya bernilai tinggi. "
+            "Kombinasi ini kontradiktif karena memakan waktu produktif dan non-produktif yang maksimal secara bersamaan."
+        )
+        
+    # 5. Kurang tidur ekstrem tapi mood sangat tinggi
+    if jam_tidur <= 4 and mood >= 8:
+        pesan.append(
+            f"**Jam Tidur** sangat kurang ({jam_tidur} jam) tetapi **Mood Pagi** Anda sangat tinggi ({mood}). "
+            "Kurang tidur biasanya berdampak negatif pada suasana hati di pagi hari."
+        )
+        
+    return pesan
+
