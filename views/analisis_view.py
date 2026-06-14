@@ -4,15 +4,7 @@ import pandas as pd
 from utils.helper import normalisasi_data_baru, get_saran, cek_konsistensi
 from utils.styles import apply_custom_styles
 import matplotlib.pyplot as plt
-import sys
-import subprocess
-
-# Auto-install streamlit-keyup if not present
-try:
-    from st_keyup import st_keyup  # type: ignore
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "streamlit-keyup"])
-    from st_keyup import st_keyup  # type: ignore
+from st_keyup import st_keyup  # type: ignore
 
 
 def sanitize_numeric_input(val_str):
