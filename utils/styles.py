@@ -1,45 +1,8 @@
 import streamlit as st
-import streamlit.components.v1 as components
-
-
-def _fix_sidebar_bg():
-    """Inject JavaScript ke iframe untuk membaca warna latar .stApp dan menerapkannya ke sidebar.
-    Ini menyelesaikan masalah sidebar transparan di mobile karena React Portal di luar .stApp."""
-    components.html(
-        """
-        <script>
-        (function() {
-            function applyBg() {
-                var p = window.parent;
-                var sidebar = p.document.querySelector('[data-testid="stSidebar"]');
-                var app     = p.document.querySelector('.stApp');
-                if (!sidebar || !app) return;
-                var appStyle = p.getComputedStyle(app);
-                var bg = appStyle.backgroundColor;
-                // Jika latar app bening/belum di-render, coba lagi nanti
-                if (!bg || bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent') return;
-                sidebar.style.setProperty('background-color', bg, 'important');
-            }
-            // Jalankan beberapa kali untuk menangkap render yang terlambat
-            applyBg();
-            setTimeout(applyBg, 300);
-            setTimeout(applyBg, 800);
-            // Perbarui setiap kali tema berganti (MutationObserver pada body)
-            var observer = new MutationObserver(applyBg);
-            observer.observe(window.parent.document.body,
-                { attributes: true, attributeFilter: ['class', 'style'], subtree: false });
-        })();
-        </script>
-        """,
-        height=0,
-        scrolling=False
-    )
 
 
 def apply_custom_styles():
     """Mengoleskan gaya CSS kustom untuk membuat UI Streamlit modern, elegan, dan premium (adaptif Light/Dark mode)."""
-    # Perbaiki sidebar transparan di mobile via JavaScript
-    _fix_sidebar_bg()
     st.markdown(
         """
         <style>
@@ -64,9 +27,8 @@ def apply_custom_styles():
             max-width: 1200px !important;
         }
 
-        /* Sidebar Styling (Solid & Adaptif) */
+        /* Sidebar Styling — hanya border, background dikelola native Streamlit */
         section[data-testid="stSidebar"] {
-            background-color: var(--secondary-background-color) !important;
             border-right: 1px solid rgba(128, 128, 128, 0.15) !important;
         }
 
