@@ -98,13 +98,11 @@ def render(repo, perceptron):
 
     with st.expander("🔍 Lihat Detail Step-by-Step Perubahan Bobot Selama Training"):
         st.write("Berikut ini adalah log atau rekaman **setiap kali bobot diperbarui** (karena prediksi model meleset) selama proses training:")
-        
         # Simulasi ulang untuk mencatat history
         sim_w = np.zeros(repo.X.shape[1])
         sim_b = 0.0
         alpha = perceptron.learning_rate
         history = []
-        
         for ep in range(perceptron.epoch):
             error_count = 0
             for i, (xi, target) in enumerate(zip(repo.X, repo.y)):
