@@ -94,12 +94,3 @@ with col_summary_2:
     cc3.metric("Klaster Burnout", f"{count_burnout}")
 
 st.divider()
-st.markdown(
-    """
-    <div style="display: flex; align-items: center; gap: 10px; color: #4F46E5; font-weight: 600; font-size: 1.05rem;">
-        <span>👈</span>
-        <span>Silakan pilih halaman menu pada <b>sidebar di sebelah kiri</b> untuk menavigasi aplikasi.</span>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
