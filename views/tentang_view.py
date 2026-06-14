@@ -11,8 +11,8 @@ def render():
         """
         <div style="background: linear-gradient(135deg, rgba(79, 70, 229, 0.08) 0%, rgba(124, 58, 237, 0.08) 100%); border: 1px solid rgba(79, 70, 229, 0.2); padding: 1.5rem; border-radius: 16px; margin-bottom: 2rem;">
             <p style="margin: 0; font-size: 1.1rem; line-height: 1.6; color: var(--text-color); font-family: 'Plus Jakarta Sans'; opacity: 0.95;">
-                Aplikasi ini dikembangkan sebagai proyek <b>Ujian Akhir Semester (UAS)</b> untuk mata kuliah <b>Jaringan Syaraf Tiruan</b>. 
-                Tujuannya adalah membantu mahasiswa menganalisis kondisi produktivitas harian dan mendeteksi potensi kejenuhan (burnout) 
+                Aplikasi ini dikembangkan sebagai proyek <b>Jaringan Syaraf Tiruan</b>.
+                Tujuannya adalah membantu mahasiswa menganalisis kondisi produktivitas harian dan mendeteksi potensi kejenuhan (burnout)
                 berdasarkan pola aktivitas harian menggunakan dua model JST yang saling melengkapi.
             </p>
         </div>

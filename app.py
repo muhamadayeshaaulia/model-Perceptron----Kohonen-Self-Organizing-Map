@@ -17,8 +17,8 @@ st.markdown(
             🧠 Deteksi Produktivitas & Burnout Mahasiswa
         </h1>
         <p style="font-size: 1.05rem; opacity: 0.95; margin: 0; font-family: 'Plus Jakarta Sans'; line-height: 1.6; color: white !important; -webkit-text-fill-color: white !important;">
-            Aplikasi analisis cerdas berbasis <b>Jaringan Syaraf Tiruan (JST)</b>. Menggunakan kombinasi algoritma 
-            <b>Perceptron</b> (klasifikasi terarah) dan <b>Kohonen Self-Organizing Map (SOM)</b> (pengelompokkan mandiri) 
+            Aplikasi analisis cerdas berbasis <b>Jaringan Syaraf Tiruan (JST)</b>. Menggunakan kombinasi algoritma
+            <b>Perceptron</b> (klasifikasi terarah) dan <b>Kohonen Self-Organizing Map (SOM)</b> (pengelompokkan mandiri)
             untuk memetakan serta mendeteksi kondisi aktivitas dan kesehatan harian Anda.
         </p>
     </div>
