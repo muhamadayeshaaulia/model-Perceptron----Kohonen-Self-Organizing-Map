@@ -40,6 +40,15 @@ def render(repo, perceptron):
     ax.tick_params(colors='#94A3B8', labelsize=9)
     st.pyplot(fig)
 
+    # Tabel epoch vs error
+    st.write("##### 📋 Tabel Error per Epoch")
+    df_epoch = pd.DataFrame({
+        "Epoch": list(range(1, len(perceptron.errors) + 1)),
+        "Total Error": perceptron.errors,
+        "Status": ["\u2705 Konvergen (Error = 0)" if e == 0 else "⏳ Masih ada error" for e in perceptron.errors]
+    })
+    st.dataframe(df_epoch, width="stretch", hide_index=True)
+
     st.divider()
 
     col1, col2, col3 = st.columns(3)
@@ -55,6 +64,57 @@ def render(repo, perceptron):
         predictions = perceptron.predict(repo.X)
         accuracy = (predictions == repo.y).mean() * 100
         st.metric("Akurasi Training", f"{accuracy:.2f}%")
+
+    st.divider()
+    st.subheader("📊 Visualisasi Garis Keputusan (Decision Boundary) Perceptron")
+    st.write("Garis pemisah Perceptron pada dimensi **Mood vs Stres**, menggunakan nilai rata-rata fitur lainnya dari data latih.")
+
+    fig_db, ax_db = plt.subplots(figsize=(9, 5))
+    fig_db.patch.set_facecolor('#0F172A')
+    ax_db.set_facecolor('#1E293B')
+
+    colors_db = {0: "#F87171", 1: "#34D399"}
+    for label_id in [0, 1]:
+        data_label = repo.df[repo.df["label"] == label_id]
+        ax_db.scatter(
+            data_label["mood"], data_label["stres"],
+            label="Produktif (Data Latih)" if label_id == 1 else "Tidak Produktif (Data Latih)",
+            color=colors_db[label_id], alpha=0.85,
+            edgecolors="#1E293B", linewidths=0.7, s=85, zorder=3
+        )
+
+    # Hitung garis keputusan menggunakan nilai rata-rata fitur non-plot
+    w = perceptron.weights
+    b = perceptron.bias
+    # index: 0=tidur, 1=mood, 2=stres, 3=belajar, 4=hp, 5=tugas
+    mean_tidur   = float(repo.df["jam_tidur"].mean())
+    mean_belajar = float(repo.df["jam_belajar"].mean())
+    mean_hp      = float(repo.df["jam_hp"].mean())
+    mean_tugas   = float(repo.df["jumlah_tugas"].mean())
+    const_val = b + w[0]*mean_tidur + w[3]*mean_belajar + w[4]*mean_hp + w[5]*mean_tugas
+
+    mood_range = np.linspace(repo.nilai_min[1], repo.nilai_max[1], 200)
+    if w[2] != 0:
+        stres_db = -(w[1] * mood_range + const_val) / w[2]
+        ax_db.plot(mood_range, stres_db, color="#818CF8", linestyle="--", linewidth=2.5,
+                   label="Garis Keputusan Perceptron", zorder=4)
+    elif w[1] != 0:
+        ax_db.axvline(x=-const_val/w[1], color="#818CF8", linestyle="--", linewidth=2.5,
+                      label="Garis Keputusan Perceptron", zorder=4)
+
+    ax_db.set_xlabel("Mood Pagi", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
+    ax_db.set_ylabel("Tingkat Stres", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
+    ax_db.set_title("Decision Boundary Perceptron (Mood vs Stres)", fontsize=12, fontweight='bold', color='#F8FAFC', pad=14)
+    ax_db.legend(frameon=True, facecolor='#1E293B', edgecolor='#334155', fontsize=9)
+    ax_db.grid(True, linestyle="--", alpha=0.15, color="#94A3B8")
+    ax_db.spines['top'].set_visible(False)
+    ax_db.spines['right'].set_visible(False)
+    ax_db.spines['left'].set_color('#334155')
+    ax_db.spines['bottom'].set_color('#334155')
+    ax_db.tick_params(colors='#94A3B8', labelsize=9)
+    ax_db.set_ylim(0, 11)
+    st.pyplot(fig_db)
+    st.caption(f"*Nilai rata-rata fitur pendukung yang digunakan: Jam Tidur={mean_tidur:.1f}, Jam Belajar={mean_belajar:.1f}, Jam HP={mean_hp:.1f}, Jumlah Tugas={mean_tugas:.1f}*")
 
     st.divider()
     st.subheader("🔍 Langkah Perhitungan Klasifikasi Perceptron Per Baris Data")
