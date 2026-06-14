@@ -122,6 +122,40 @@ def render(repo, perceptron, som):
 
         # ─────────────────────────── TAB PERCEPTRON ──────────────────────
         with tab_perceptron:
+            # --- Ringkasan Training Epoch ---
+            st.write("##### 📈 Ringkasan Training Model Perceptron")
+            col_ep1, col_ep2, col_ep3 = st.columns(3)
+            with col_ep1:
+                st.metric("Total Epoch", len(perceptron.errors))
+            with col_ep2:
+                predictions_all = perceptron.predict(repo.X)
+                accuracy_all = (predictions_all == repo.y).mean() * 100
+                st.metric("Akurasi Training", f"{accuracy_all:.2f}%")
+            with col_ep3:
+                st.metric("Bias Akhir", round(float(perceptron.bias), 4))
+
+            fig_ep, ax_ep = plt.subplots(figsize=(8.5, 3.5))
+            fig_ep.patch.set_facecolor('#0F172A')
+            ax_ep.set_facecolor('#1E293B')
+            epochs_range = range(1, len(perceptron.errors) + 1)
+            ax_ep.plot(
+                epochs_range, perceptron.errors,
+                marker="o", color="#818CF8", linewidth=2.5,
+                markersize=6, markerfacecolor="#C084FC",
+                markeredgecolor="#0F172A", markeredgewidth=1.5
+            )
+            ax_ep.set_xlabel("Epoch", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
+            ax_ep.set_ylabel("Total Error", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
+            ax_ep.set_title("Kurva Penurunan Error Perceptron", fontsize=11, fontweight='bold', color='#F8FAFC', pad=12)
+            ax_ep.grid(True, linestyle="--", alpha=0.15, color="#94A3B8")
+            ax_ep.spines['top'].set_visible(False)
+            ax_ep.spines['right'].set_visible(False)
+            ax_ep.spines['left'].set_color('#334155')
+            ax_ep.spines['bottom'].set_color('#334155')
+            ax_ep.tick_params(colors='#94A3B8', labelsize=9)
+            st.pyplot(fig_ep)
+
+            st.divider()
             st.write("##### Perhitungan Net Input Perceptron")
             bobot = perceptron.weights
             bias = perceptron.bias
