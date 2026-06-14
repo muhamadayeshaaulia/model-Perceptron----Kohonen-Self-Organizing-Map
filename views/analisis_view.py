@@ -108,8 +108,16 @@ def render(repo, perceptron, som):
     elif jumlah_tugas is not None and (jumlah_tugas < repo.nilai_min[5] or jumlah_tugas > repo.nilai_max[5]):
         is_out_of_bounds = True
 
-    # Status keaktifan tombol: nonaktif jika kosong, ada format invalid, total jam tidak valid (> 24), atau di luar batas data latih
-    is_disabled = ada_yang_kosong or ada_yang_invalid or is_physically_impossible or is_out_of_bounds
+    # Pengecekan konsistensi logis
+    pesan_inconsistent_filtered = []
+    if not ada_yang_kosong and not ada_yang_invalid and not is_physically_impossible and not is_out_of_bounds:
+        pesan_inconsistent = cek_konsistensi(jam_tidur, mood, stres, jam_belajar, jam_hp, jumlah_tugas)
+        pesan_inconsistent_filtered = [p for p in pesan_inconsistent if "24 jam" not in p]
+
+    is_inconsistent = len(pesan_inconsistent_filtered) > 0
+
+    # Status keaktifan tombol: nonaktif jika kosong, ada format invalid, total jam tidak valid (> 24), di luar batas data latih, atau tidak konsisten
+    is_disabled = ada_yang_kosong or ada_yang_invalid or is_physically_impossible or is_out_of_bounds or is_inconsistent
 
     # Tampilkan info jika masih ada yang kosong atau tidak valid
     if ada_yang_invalid:
@@ -120,17 +128,10 @@ def render(repo, perceptron, som):
         st.error(f"❌ **Data Input Tidak Valid secara Fisik!** Jumlah Jam Tidur ({jam_tidur} jam), Jam Belajar ({jam_belajar} jam), dan Jam HP ({jam_hp} jam) berjumlah **{total_jam} jam**, melebihi 24 jam dalam sehari. Silakan sesuaikan kembali input Anda.")
     elif is_out_of_bounds:
         st.error("❌ **Data Input di Luar Batas Data Latih!** Model JST tidak dapat menganalisis data yang berada di luar batas rentang data latih. Harap masukkan nilai sesuai batasan.")
-
-    # Pengecekan peringatan konsistensi logis (Non-blocking Warnings) jika tidak kosong, tidak invalid, fisik valid, dan dalam batas
-    if not ada_yang_kosong and not ada_yang_invalid and not is_physically_impossible and not is_out_of_bounds:
-        pesan_inconsistent = cek_konsistensi(jam_tidur, mood, stres, jam_belajar, jam_hp, jumlah_tugas)
-        pesan_inconsistent_filtered = [p for p in pesan_inconsistent if "24 jam" not in p]
-
-        if pesan_inconsistent_filtered:
-            st.warning("❌ **Data Input Tidak Konsisten!** Silakan sesuaikan kembali input Anda agar logis:")
-            for p in pesan_inconsistent_filtered:
-                st.markdown(f"- {p}")
-            st.caption("*Catatan: Model JST tetap dapat menganalisis data ini jika Anda mengklik tombol Analisis di bawah.*")
+    elif is_inconsistent:
+        st.error("❌ **Data Input Tidak Konsisten!** Harap sesuaikan kembali input Anda agar logis:")
+        for p in pesan_inconsistent_filtered:
+            st.markdown(f"- {p}")
 
     # Tombol Analisis Sekarang (Selalu ditampilkan, dinonaktifkan jika kosong, invalid, atau total jam tidak logis)
     if st.button("🔍 Analisis Sekarang", use_container_width=True, disabled=is_disabled):
@@ -162,7 +163,7 @@ def render(repo, perceptron, som):
         }
 
     # Render hasil analisis jika data input saat ini cocok dengan data yang terakhir dianalisis
-    if not ada_yang_kosong and not ada_yang_invalid and not is_physically_impossible and not is_out_of_bounds and "last_analysis" in st.session_state:
+    if not ada_yang_kosong and not ada_yang_invalid and not is_physically_impossible and not is_out_of_bounds and not is_inconsistent and "last_analysis" in st.session_state:
         la = st.session_state.last_analysis
         current_inputs = [jam_tidur, mood, stres, jam_belajar, jam_hp, jumlah_tugas]
 
