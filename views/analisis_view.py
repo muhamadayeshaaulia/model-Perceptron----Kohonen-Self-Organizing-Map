@@ -93,19 +93,36 @@ def render(repo, perceptron, som):
         total_jam = (jam_tidur if jam_tidur is not None else 0.0) + (jam_belajar if jam_belajar is not None else 0.0) + (jam_hp if jam_hp is not None else 0.0)
         is_physically_impossible = total_jam > 24
 
-    # Status keaktifan tombol: nonaktif jika kosong, ada format invalid, atau jika total jam tidak valid (> 24)
-    is_disabled = ada_yang_kosong or ada_yang_invalid or is_physically_impossible
+    # Cek apakah ada inputan yang di luar batas data latih
+    is_out_of_bounds = False
+    if jam_tidur is not None and (jam_tidur < repo.nilai_min[0] or jam_tidur > repo.nilai_max[0]):
+        is_out_of_bounds = True
+    elif mood is not None and (mood < repo.nilai_min[1] or mood > repo.nilai_max[1]):
+        is_out_of_bounds = True
+    elif stres is not None and (stres < repo.nilai_min[2] or stres > repo.nilai_max[2]):
+        is_out_of_bounds = True
+    elif jam_belajar is not None and (jam_belajar < repo.nilai_min[3] or jam_belajar > repo.nilai_max[3]):
+        is_out_of_bounds = True
+    elif jam_hp is not None and (jam_hp < repo.nilai_min[4] or jam_hp > repo.nilai_max[4]):
+        is_out_of_bounds = True
+    elif jumlah_tugas is not None and (jumlah_tugas < repo.nilai_min[5] or jumlah_tugas > repo.nilai_max[5]):
+        is_out_of_bounds = True
 
-    # Tampilkan info jika masih ada yang kosong
+    # Status keaktifan tombol: nonaktif jika kosong, ada format invalid, total jam tidak valid (> 24), atau di luar batas data latih
+    is_disabled = ada_yang_kosong or ada_yang_invalid or is_physically_impossible or is_out_of_bounds
+
+    # Tampilkan info jika masih ada yang kosong atau tidak valid
     if ada_yang_invalid:
         st.error("❌ **Format Input Salah!** Pastikan semua kolom hanya diisi dengan angka saja.")
     elif ada_yang_kosong:
         st.info("💡 **Silakan isi semua data harian di atas dengan angka untuk memulai analisis.**")
     elif is_physically_impossible:
         st.error(f"❌ **Data Input Tidak Valid secara Fisik!** Jumlah Jam Tidur ({jam_tidur} jam), Jam Belajar ({jam_belajar} jam), dan Jam HP ({jam_hp} jam) berjumlah **{total_jam} jam**, melebihi 24 jam dalam sehari. Silakan sesuaikan kembali input Anda.")
+    elif is_out_of_bounds:
+        st.error("❌ **Data Input di Luar Batas Data Latih!** Model JST tidak dapat menganalisis data yang berada di luar batas rentang data latih. Harap masukkan nilai sesuai batasan.")
 
-    # Pengecekan peringatan konsistensi logis (Non-blocking Warnings) jika tidak kosong, tidak invalid, dan fisik valid
-    if not ada_yang_kosong and not ada_yang_invalid and not is_physically_impossible:
+    # Pengecekan peringatan konsistensi logis (Non-blocking Warnings) jika tidak kosong, tidak invalid, fisik valid, dan dalam batas
+    if not ada_yang_kosong and not ada_yang_invalid and not is_physically_impossible and not is_out_of_bounds:
         pesan_inconsistent = cek_konsistensi(jam_tidur, mood, stres, jam_belajar, jam_hp, jumlah_tugas)
         pesan_inconsistent_filtered = [p for p in pesan_inconsistent if "24 jam" not in p]
 
@@ -145,7 +162,7 @@ def render(repo, perceptron, som):
         }
 
     # Render hasil analisis jika data input saat ini cocok dengan data yang terakhir dianalisis
-    if not ada_yang_kosong and not ada_yang_invalid and not is_physically_impossible and "last_analysis" in st.session_state:
+    if not ada_yang_kosong and not ada_yang_invalid and not is_physically_impossible and not is_out_of_bounds and "last_analysis" in st.session_state:
         la = st.session_state.last_analysis
         current_inputs = [jam_tidur, mood, stres, jam_belajar, jam_hp, jumlah_tugas]
 
