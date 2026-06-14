@@ -1,3 +1,4 @@
+from typing import Optional
 import numpy as np
 
 
@@ -5,9 +6,9 @@ class Perceptron:
     def __init__(self, learning_rate=0.1, epoch=50):
         self.learning_rate = learning_rate
         self.epoch = epoch
-        self.weights = None
-        self.bias = 0
-        self.errors = []
+        self.weights: Optional[np.ndarray] = None
+        self.bias: float = 0.0
+        self.errors: list = []
 
     def activation(self, x):
         return 1 if x >= 0 else 0
@@ -37,6 +38,8 @@ class Perceptron:
             self.errors.append(total_error)
 
     def predict_one(self, x):
+        if self.weights is None:
+            raise ValueError("Model Perceptron belum dilatih (fit).")
         linear_output = np.dot(x, self.weights) + self.bias
         return self.activation(linear_output)
 
