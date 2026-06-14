@@ -134,20 +134,20 @@ def render(repo, som):
 
     st.divider()
     st.subheader("📖 Teori & Rumus Perhitungan Kohonen (SOM)")
-    
+
     st.markdown(f"""
     Self-Organizing Map (SOM) atau Jaringan Kohonen adalah algoritma *Unsupervised Learning* yang mengelompokkan data berdasarkan kemiripan karakteristik tanpa memerlukan label target. Model ini dilatih melalui dua langkah utama:
-    
+
     ##### 1. Pemilihan Best Matching Unit (BMU / Neuron Pemenang)
     Untuk setiap data input ($x$), model mencari neuron/klaster dengan bobot ($w_j$) terdekat menggunakan rumus **Jarak Euclidean**:
     $$d_j = \\sqrt{{\\sum_{{i=1}}^n (x_i - w_{{ji}})^2}}$$
     $$c = \\arg\\min_j (d_j)$$
     Dimana $c$ adalah indeks neuron pemenang (BMU) yang memiliki jarak Euclidean terkecil.
-    
+
     ##### 2. Pembaruan Bobot (Weight Update)
     Hanya bobot neuron pemenang ($c$) yang diperbarui mendekati data input ($x$) menggunakan rumus:
     $$w_{{c}}(t+1) = w_{{c}}(t) + \\alpha(t) \\cdot (x - w_{{c}}(t))$$
-    
+
     *Keterangan:*
     *   $x$: Vektor data input (dalam bentuk ternormalisasi)
     *   $w_j$: Vektor bobot untuk klaster ke-$j$ (Bobot akhir ditampilkan pada tabel di atas)
