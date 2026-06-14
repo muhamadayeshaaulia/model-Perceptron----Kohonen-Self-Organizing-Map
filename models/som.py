@@ -34,11 +34,9 @@ class KohonenSOM:
         # Cari klaster Burnout (bobot stres tertinggi)
         stres_weights = [w[2] for w in self.weights]
         burnout_idx = int(np.argmax(stres_weights))
-        
         # Dapatkan indeks 2 klaster lainnya
         remaining_indices = [i for i in range(self.jumlah_cluster) if i != burnout_idx]
         idx_a, idx_b = remaining_indices
-        
         # Bandingkan bobot jam belajar (indeks 3)
         if self.weights[idx_a][3] > self.weights[idx_b][3]:
             produktif_idx = idx_a
@@ -46,7 +44,6 @@ class KohonenSOM:
         else:
             produktif_idx = idx_b
             santai_idx = idx_a
-            
         self.cluster_names[burnout_idx] = "Burnout"
         self.cluster_names[santai_idx] = "Santai"
         self.cluster_names[produktif_idx] = "Produktif"

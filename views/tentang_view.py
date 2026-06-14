@@ -13,7 +13,7 @@ def render():
             <p style="margin: 0; font-size: 1.1rem; line-height: 1.6; color: var(--text-color); font-family: 'Plus Jakarta Sans'; opacity: 0.95;">
                 Aplikasi ini dikembangkan sebagai proyek <b>Jaringan Syaraf Tiruan</b>.
                 Tujuannya adalah membantu mahasiswa menganalisis kondisi produktivitas harian dan mendeteksi potensi kejenuhan (burnout)
-                berdasarkan pola aktivitas harian menggunakan dua model JST yang saling melengkapi.
+                berdasarkan pola aktivitas harian menggunakan dua model yang saling melengkapi.
             </p>
         </div>
         """,

@@ -20,18 +20,17 @@ def render(repo, som):
 
     st.write("#### 🔍 Langkah Perhitungan Jarak Euclidean Per Baris Data")
     st.write("Pilih salah satu baris indeks data dari tabel di atas untuk melihat rincian perhitungan matematika jarak Euclidean ke setiap centroid cluster.")
-    
+
     # Dropdown select box
     row_idx = st.selectbox(
-        "Pilih Baris Data Latih:", 
-        options=range(len(repo.df)), 
+        "Pilih Baris Data Latih:",
+        options=range(len(repo.df)),
         format_func=lambda i: f"Baris {i+1} (Tidur: {repo.df.iloc[i]['jam_tidur']}, Mood: {repo.df.iloc[i]['mood']}, Stres: {repo.df.iloc[i]['stres']}, Belajar: {repo.df.iloc[i]['jam_belajar']}, HP: {repo.df.iloc[i]['jam_hp']}, Tugas: {repo.df.iloc[i]['jumlah_tugas']})"
     )
-    
+
     # Tampilkan rincian data terpilih
     data_raw = repo.X[row_idx]
     data_norm = repo.X_norm[row_idx]
-    
     col_d1, col_d2 = st.columns(2)
     with col_d1:
         st.write("**Data Asli (Skala Riil):**")
@@ -39,34 +38,28 @@ def render(repo, som):
     with col_d2:
         st.write("**Data Ternormalisasi (Skala [0, 1]):**")
         st.dataframe(pd.DataFrame([data_norm], columns=repo.fitur), width="stretch")
-        
     distances = np.linalg.norm(som.weights - data_norm, axis=1)
     winner_cluster_id = np.argmin(distances)
-    
+
     for i in range(len(som.weights)):
         cluster_name = som.get_cluster_name(i)
         w_c = som.weights[i]
-        
         # Hitung selisih kuadrat per fitur
         selisih_kuadrat = [(data_norm[j] - w_c[j])**2 for j in range(6)]
         langkah_sum = " + ".join([f"({data_norm[j]:.4f} - {w_c[j]:.4f})^2" for j in range(6)])
         langkah_num = " + ".join([f"{s:.4f}" for s in selisih_kuadrat])
         total_sum = sum(selisih_kuadrat)
-        
         is_winner = "🏆 (Pemenang - Terdekat)" if i == winner_cluster_id else ""
-        
         with st.expander(f"🔍 Jarak ke Centroid {cluster_name} {is_winner}"):
             st.latex(rf"d_{{\text{{{cluster_name}}}}} = \sqrt{{{langkah_sum}}}")
             st.latex(rf"d_{{\text{{{cluster_name}}}}} = \sqrt{{{langkah_num}}}")
             st.latex(rf"d_{{\text{{{cluster_name}}}}} = \sqrt{{{total_sum:.4f}}} = {np.sqrt(total_sum):.4f}")
-            
     st.success(f"**Kesimpulan:** Baris {row_idx + 1} memiliki jarak terkecil ke centroid **{som.get_cluster_name(winner_cluster_id)}** ({np.min(distances):.4f}), sehingga dimasukkan ke klaster **{som.get_cluster_name(winner_cluster_id)}**.")
 
     st.divider()
 
     st.subheader("Visualisasi Cluster (Mood vs Stres)")
     fig, ax = plt.subplots(figsize=(9, 5.5))
-    
     # Modern premium dark console style
     fig.patch.set_facecolor('#0F172A')
     ax.set_facecolor('#1E293B')
@@ -129,7 +122,7 @@ def render(repo, som):
     ax.spines['right'].set_visible(False)
     ax.spines['left'].set_color('#334155')
     ax.spines['bottom'].set_color('#334155')
-    
+
     st.pyplot(fig)
 
     st.divider()
