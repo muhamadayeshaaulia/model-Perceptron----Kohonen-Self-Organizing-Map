@@ -117,84 +117,17 @@ def render(repo, perceptron, som):
         st.divider()
         st.subheader("🔍 Detail Matematis & Validasi Model")
 
-        tab1, tab2, tab3 = st.tabs(["📊 Diagram Kohonen (SOM)", "🧠 Bobot & Bias Perceptron", "🧩 Validasi Jarak Kohonen"])
+        # ── 2 Tab: Perceptron | Kohonen ──────────────────────────────────
+        tab_perceptron, tab_kohonen = st.tabs(["🧠 Bobot & Bias Perceptron", "🧩 Validasi Jarak Kohonen"])
 
-        with tab1:
-            st.write("##### Posisi Data Baru pada Pembagian Cluster (Mood vs Stres)")
-            fig, ax = plt.subplots(figsize=(8.5, 4.5))
-            
-            # Modern premium dark console style
-            fig.patch.set_facecolor('#0F172A')
-            ax.set_facecolor('#1E293B')
-            colors = ["#F87171", "#60A5FA", "#34D399"] # Glowing coral, bright blue, emerald green
-            
-            # Ambil cluster dari data latih
-            clusters_train = som.predict(repo.X_norm)
-            df_cluster = repo.df.copy()
-            df_cluster["cluster"] = clusters_train
-            
-            for idx, cluster_id in enumerate(np.unique(clusters_train)):
-                data_cluster = df_cluster[df_cluster["cluster"] == cluster_id]
-                ax.scatter(
-                    data_cluster["mood"],
-                    data_cluster["stres"],
-                    label=som.get_cluster_name(cluster_id),
-                    color=colors[idx % len(colors)],
-                    alpha=0.8,
-                    edgecolors="#1E293B",
-                    linewidths=0.7,
-                    s=80,
-                    zorder=3
-                )
-            
-            # Plot Centroid Kohonen (Pusat Cluster / Bobot Model)
-            for idx, w in enumerate(som.weights):
-                # Denormalisasi bobot mood (index 1) dan stres (index 2) ke skala asli
-                mood_c = w[1] * (repo.nilai_max[1] - repo.nilai_min[1]) + repo.nilai_min[1]
-                stres_c = w[2] * (repo.nilai_max[2] - repo.nilai_min[2]) + repo.nilai_min[2]
-                ax.scatter(
-                    mood_c,
-                    stres_c,
-                    color=colors[idx % len(colors)],
-                    edgecolors="#F8FAFC",
-                    s=180,
-                    marker="X",
-                    linewidths=1.5,
-                    label=f"Pusat Cluster: {som.get_cluster_name(idx)}",
-                    zorder=4
-                )
-            
-            # Plot data baru
-            ax.scatter(
-                mood_val,
-                stres_val,
-                color="#FBBF24", # Gold-yellow glow
-                edgecolors="black",
-                s=260,
-                marker="*",
-                linewidths=1.2,
-                label="Data Baru Anda",
-                zorder=5
-            )
-            
-            ax.set_xlabel("Mood Pagi", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
-            ax.set_ylabel("Tingkat Stres", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
-            ax.legend(frameon=True, facecolor='#1E293B', edgecolor='#334155', fontsize=9)
-            ax.grid(True, linestyle="--", alpha=0.15, color="#94A3B8")
-            ax.spines['top'].set_visible(False)
-            ax.spines['right'].set_visible(False)
-            ax.spines['left'].set_color('#334155')
-            ax.spines['bottom'].set_color('#334155')
-            ax.tick_params(colors='#94A3B8', labelsize=9)
-            st.pyplot(fig)
-
-        with tab2:
+        # ─────────────────────────── TAB PERCEPTRON ──────────────────────
+        with tab_perceptron:
             st.write("##### Perhitungan Net Input Perceptron")
             bobot = perceptron.weights
             bias = perceptron.bias
             kontribusi = data_baru_clipped[0] * bobot
             total_net_input = np.sum(kontribusi) + bias
-            
+
             df_perceptron = pd.DataFrame({
                 "Fitur": repo.fitur,
                 "Nilai Input (Clipped)": data_baru_clipped[0],
@@ -202,79 +135,71 @@ def render(repo, perceptron, som):
                 "Kontribusi (Nilai x Bobot)": kontribusi
             })
             st.dataframe(df_perceptron, width="stretch")
-            
+
             st.markdown("**Persamaan Linear:**")
             st.latex(rf"\text{{Net Input}} = \sum (\text{{Nilai}} \times \text{{Bobot}}) + \text{{Bias}}")
-            st.markdown(f"**Bias Model**: `{bias:.4f}`")
-            
+            st.markdown(
+                f"""<div style="background: rgba(79,70,229,0.08); border: 1px solid rgba(79,70,229,0.25); 
+                border-radius: 10px; padding: 0.75rem 1rem; margin: 0.5rem 0;">
+                <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; 
+                letter-spacing: 0.05em; opacity: 0.7;">📌 Nilai Bias Model (tetap setelah training)</span><br/>
+                <span style="font-size: 1.2rem; font-weight: 800; color: #818CF8;">b = {bias:.4f}</span>
+                <span style="font-size: 0.82rem; opacity: 0.65; margin-left: 8px;">
+                (Ini adalah hasil training — bukan hasil prediksi)</span>
+                </div>""",
+                unsafe_allow_html=True
+            )
+
             st.markdown("**Langkah Perhitungan Manual Perceptron:**")
             langkah_perkalian = " + ".join([f"({data_baru_clipped[0][i]:.1f} \\times {bobot[i]:.4f})" for i in range(len(bobot))])
             st.latex(rf"\text{{Net Input}} = {langkah_perkalian} + ({bias:.4f})")
             st.latex(rf"\text{{Net Input}} = {np.sum(kontribusi):.4f} + ({bias:.4f}) = {total_net_input:.4f}")
 
+            # Hasil aktivasi dengan badge warna yang jelas
             status_aktivasi = ">= 0" if total_net_input >= 0 else "< 0"
-            st.markdown(f"**Hasil Aktivasi**: `Net Input {status_aktivasi} ->` **{hasil_perceptron}**")
+            warna_aktivasi = "#10B981" if total_net_input >= 0 else "#EF4444"
+            emoji_aktivasi = "✅" if total_net_input >= 0 else "❌"
+            nilai_y = 1 if total_net_input >= 0 else 0
+            st.markdown(
+                f"""<div style="background: rgba({('16,185,129' if total_net_input >= 0 else '239,68,68')},0.1); 
+                border: 1.5px solid {warna_aktivasi}; border-radius: 10px; 
+                padding: 0.85rem 1rem; margin: 0.75rem 0;">
+                <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; 
+                letter-spacing: 0.05em; color: {warna_aktivasi};">⚡ Hasil Fungsi Aktivasi Step (y = f(Net Input))</span><br/>
+                <span style="font-size: 1rem; font-weight: 600; opacity: 0.85;">
+                Net Input = <strong>{total_net_input:.4f}</strong> {status_aktivasi}
+                </span><br/>
+                <span style="font-size: 1.25rem; font-weight: 800; color: {warna_aktivasi};">
+                {emoji_aktivasi} y = {nilai_y} → <strong>{hasil_perceptron}</strong>
+                </span>
+                </div>""",
+                unsafe_allow_html=True
+            )
 
             st.write("##### Visualisasi Garis Keputusan (Decision Boundary) Perceptron")
-            # Plot Mood vs Stres dengan pemisahan kelas Perceptron
             fig_p, ax_p = plt.subplots(figsize=(8.5, 4.5))
-            
-            # Modern premium dark console style
             fig_p.patch.set_facecolor('#0F172A')
             ax_p.set_facecolor('#1E293B')
-            
-            # Scatter plot data asli berdasarkan label kelas
-            colors_p = {0: "#F87171", 1: "#34D399"} # Glowing coral red & emerald green
+            colors_p = {0: "#F87171", 1: "#34D399"}
             for label_id in [0, 1]:
                 data_label = repo.df[repo.df["label"] == label_id]
                 ax_p.scatter(
-                    data_label["mood"],
-                    data_label["stres"],
+                    data_label["mood"], data_label["stres"],
                     label="Produktif (Data Latih)" if label_id == 1 else "Tidak Produktif (Data Latih)",
-                    color=colors_p[label_id],
-                    alpha=0.8,
-                    edgecolors="#1E293B",
-                    linewidths=0.7,
-                    s=80,
-                    zorder=3
+                    color=colors_p[label_id], alpha=0.8, edgecolors="#1E293B", linewidths=0.7, s=80, zorder=3
                 )
-            
-            # Hitung decision boundary line: w_mood * mood + w_stres * stres + Const = 0
-            # Const = bias + sum_{j != mood, stres} (w_j * x_j)
             w = perceptron.weights
             b = perceptron.bias
             x_val = data_baru_clipped[0]
-            
-            # index 0: tidur, 1: mood, 2: stres, 3: belajar, 4: hp, 5: tugas
             const_val = b + w[0]*x_val[0] + w[3]*x_val[3] + w[4]*x_val[4] + w[5]*x_val[5]
-            
-            # Ambil rentang mood dari data latih untuk menggambar garis
             mood_range = np.linspace(repo.nilai_min[1], repo.nilai_max[1], 100)
-            
             if w[2] != 0:
-                # stres = - (w_mood * mood + const) / w_stres
                 stres_range = - (w[1] * mood_range + const_val) / w[2]
-                
-                # Batasi stres_range agar tidak melenceng terlalu jauh dari plot
                 ax_p.plot(mood_range, stres_range, color="#818CF8", linestyle="--", linewidth=2.5, label="Garis Pemisah Perceptron", zorder=4)
             elif w[1] != 0:
-                # Vertical line: mood = - const / w_mood
                 mood_c = - const_val / w[1]
                 ax_p.axvline(x=mood_c, color="#818CF8", linestyle="--", linewidth=2.5, label="Garis Pemisah Perceptron", zorder=4)
-                
-            # Plot data baru
-            ax_p.scatter(
-                mood_val,
-                stres_val,
-                color="#FBBF24", # Gold-yellow glow
-                edgecolors="black",
-                s=260,
-                marker="*",
-                linewidths=1.2,
-                label="Data Baru Anda",
-                zorder=5
-            )
-            
+            ax_p.scatter(mood_val, stres_val, color="#FBBF24", edgecolors="black", s=260, marker="*", linewidths=1.2, label="Data Baru Anda", zorder=5)
             ax_p.set_xlabel("Mood Pagi", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
             ax_p.set_ylabel("Tingkat Stres", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
             ax_p.legend(frameon=True, facecolor='#1E293B', edgecolor='#334155', fontsize=9)
@@ -284,14 +209,66 @@ def render(repo, perceptron, som):
             ax_p.spines['left'].set_color('#334155')
             ax_p.spines['bottom'].set_color('#334155')
             ax_p.tick_params(colors='#94A3B8', labelsize=9)
-            ax_p.set_ylim(0, 11) # Rentang wajar tingkat stres
+            ax_p.set_ylim(0, 11)
             st.pyplot(fig_p)
             st.write("*Catatan: Garis pemisah di atas digambar dengan mengasumsikan 4 fitur lainnya (Jam Tidur, Jam Belajar, Jam HP, Jumlah Tugas) bernilai konstan sesuai input baru Anda. Karena data latih lainnya memiliki nilai fitur pendukung yang bervariasi, beberapa titik data latih mungkin terlihat berada di sisi garis yang tidak sesuai dengan warna kelasnya.*")
 
-        with tab3:
-            st.write("##### Jarak Euclidean ke Centroid Kohonen (SOM)")
+        # ─────────────────────────── TAB KOHONEN ─────────────────────────
+        with tab_kohonen:
+            # Diagram Scatter Kohonen di bagian atas — visualisasi posisi data baru
+            st.write("##### 📊 Posisi Data Baru pada Cluster Kohonen (Mood vs Stres)")
+            fig, ax = plt.subplots(figsize=(8.5, 4.5))
+            fig.patch.set_facecolor('#0F172A')
+            ax.set_facecolor('#1E293B')
+            colors = ["#F87171", "#60A5FA", "#34D399"]
+
+            clusters_train = som.predict(repo.X_norm)
+            df_cluster = repo.df.copy()
+            df_cluster["cluster"] = clusters_train
+
+            for idx, cluster_id in enumerate(np.unique(clusters_train)):
+                data_cluster = df_cluster[df_cluster["cluster"] == cluster_id]
+                ax.scatter(
+                    data_cluster["mood"], data_cluster["stres"],
+                    label=som.get_cluster_name(cluster_id),
+                    color=colors[idx % len(colors)], alpha=0.8,
+                    edgecolors="#1E293B", linewidths=0.7, s=80, zorder=3
+                )
+
+            for idx, ww in enumerate(som.weights):
+                mood_c = ww[1] * (repo.nilai_max[1] - repo.nilai_min[1]) + repo.nilai_min[1]
+                stres_c = ww[2] * (repo.nilai_max[2] - repo.nilai_min[2]) + repo.nilai_min[2]
+                ax.scatter(
+                    mood_c, stres_c,
+                    color=colors[idx % len(colors)], edgecolors="#F8FAFC",
+                    s=180, marker="X", linewidths=1.5,
+                    label=f"Pusat Cluster: {som.get_cluster_name(idx)}", zorder=4
+                )
+
+            ax.scatter(
+                mood_val, stres_val,
+                color="#FBBF24", edgecolors="black",
+                s=260, marker="*", linewidths=1.2,
+                label="Data Baru Anda ⭐", zorder=5
+            )
+
+            ax.set_xlabel("Mood Pagi", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
+            ax.set_ylabel("Tingkat Stres", fontsize=10, fontweight='semibold', color='#94A3B8', labelpad=8)
+            ax.set_title("Posisi Data Baru pada Cluster Kohonen (SOM)", fontsize=11, fontweight='bold', color='#F8FAFC', pad=12)
+            ax.legend(frameon=True, facecolor='#1E293B', edgecolor='#334155', fontsize=9)
+            ax.grid(True, linestyle="--", alpha=0.15, color="#94A3B8")
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['left'].set_color('#334155')
+            ax.spines['bottom'].set_color('#334155')
+            ax.tick_params(colors='#94A3B8', labelsize=9)
+            st.pyplot(fig)
+
+            st.divider()
+
+            # Tabel validasi jarak Euclidean
+            st.write("##### 📐 Jarak Euclidean ke Centroid Kohonen (SOM)")
             distances = np.linalg.norm(som.weights - data_baru_norm, axis=1)
-            
             df_som_val = pd.DataFrame({
                 "Nama Cluster": [som.get_cluster_name(i) for i in range(len(som.weights))],
                 "Jarak Euclidean ke Centroid": distances,
@@ -302,20 +279,15 @@ def render(repo, perceptron, som):
 
             st.write("##### Langkah Perhitungan Manual Jarak Euclidean (Kohonen SOM)")
             st.markdown("Rumus: $d = \\sqrt{\\sum_{j=1}^6 (x_j - w_j)^2}$")
-            
-            # data baru ter-normalisasi
+
             x_norm = data_baru_norm[0]
-            
             for i in range(len(som.weights)):
                 cluster_name = som.get_cluster_name(i)
                 w_c = som.weights[i]
-                
-                # Hitung selisih kuadrat per fitur
                 selisih_kuadrat = [(x_norm[j] - w_c[j])**2 for j in range(6)]
                 langkah_sum = " + ".join([f"({x_norm[j]:.4f} - {w_c[j]:.4f})^2" for j in range(6)])
                 langkah_num = " + ".join([f"{s:.4f}" for s in selisih_kuadrat])
                 total_sum = sum(selisih_kuadrat)
-                
                 with st.expander(f"🔍 Langkah Perhitungan ke Cluster {cluster_name}"):
                     st.markdown(f"**Jarak ke Centroid {cluster_name}:**")
                     st.latex(rf"d_{{\text{{{cluster_name}}}}} = \sqrt{{{langkah_sum}}}")
