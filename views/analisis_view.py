@@ -24,6 +24,7 @@ def sanitize_numeric_input(val_str):
 
 def keyup_number_input(label, key):
     """Fungsi helper untuk mendapatkan input angka secara real-time. Memblokir huruf secara fisik."""
+    val_to_use = ""
     if key in st.session_state:
         raw_val = st.session_state[key]
         if raw_val is not None:
@@ -31,8 +32,9 @@ def keyup_number_input(label, key):
             sanitized = sanitize_numeric_input(raw_val_str)
             if sanitized != raw_val_str:
                 st.session_state[key] = sanitized
+            val_to_use = sanitized
 
-    val_str = st_keyup(label, key=key)
+    val_str = st_keyup(label, value=val_to_use, key=key)
     if not val_str or val_str.strip() == "":
         return None, False
     
