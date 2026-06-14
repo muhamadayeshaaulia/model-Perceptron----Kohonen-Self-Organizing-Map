@@ -10,6 +10,17 @@ def render(repo, perceptron):
     apply_custom_styles()
     st.header("📉 Hasil Training Perceptron")
 
+    # --- Tampilkan Dataset & Hasil Prediksi ---
+    st.subheader("📋 Data Latih & Hasil Prediksi Model")
+    df_pred = repo.df.copy()
+    predictions = perceptron.predict(repo.X)
+    df_pred["Prediksi_Model"] = ["Produktif" if p == 1 else "Tidak Produktif" for p in predictions]
+    df_pred["Target_Asli"] = ["Produktif" if l == 1 else "Tidak Produktif" for l in df_pred["label"]]
+    df_pred["Status"] = ["✅ Benar" if p == l else "❌ Salah" for p, l in zip(predictions, df_pred["label"])]
+    # Reorder columns to put Target_Asli, Prediksi_Model, Status at the end
+    cols = [c for c in df_pred.columns if c not in ["label", "Target_Asli", "Prediksi_Model", "Status"]] + ["Target_Asli", "Prediksi_Model", "Status"]
+    st.dataframe(df_pred[cols], width="stretch")
+    st.divider()
     st.subheader("Kurva Penurunan Error per Epoch")
     fig, ax = plt.subplots(figsize=(10, 4.5))
     # Modern premium dark console style
@@ -64,6 +75,69 @@ def render(repo, perceptron):
         predictions = perceptron.predict(repo.X)
         accuracy = (predictions == repo.y).mean() * 100
         st.metric("Akurasi Training", f"{accuracy:.2f}%")
+
+    with st.expander("Bagaimana cara kerja bobot dan bias Perceptron?"):
+        st.write("Bobot dan bias di atas bukanlah angka yang ditebak, melainkan hasil dari **proses training (pembelajaran) iteratif** Perceptron menggunakan data latih Anda.")
+        st.write("Pada setiap epoch, jika model melakukan kesalahan prediksi pada suatu baris data, ia akan mengoreksi nilai bobot dan biasnya menggunakan rumus **Perceptron Learning Rule**:")
+        st.latex(r"\Delta w = \alpha \times (y_{\text{target}} - y_{\text{prediksi}}) \times x")
+        st.latex(r"w_{\text{baru}} = w_{\text{lama}} + \Delta w")
+        st.latex(r"b_{\text{baru}} = b_{\text{lama}} + \alpha \times (y_{\text{target}} - y_{\text{prediksi}})")
+
+        st.markdown(
+            """
+            **Keterangan:**
+            - $\\alpha$ (Alpha): **Learning Rate** (Laju Pembelajaran), menentukan seberapa besar langkah koreksi.
+            - $y_{\\text{target}}$: Label asli dari dataset (1 untuk Produktif, 0 untuk Tidak Produktif).
+            - $y_{\\text{prediksi}}$: Prediksi model saat itu (hasil dari fungsi aktivasi).
+            - $x$: Nilai fitur input (misal: jam tidur, tingkat stres, dll).
+            **Contoh Logika:**
+            Jika model menebak "Produktif" (1) padahal aslinya "Tidak Produktif" (0), maka $(0 - 1) = -1$.
+            Bobot fitur yang bernilai positif akan **dikurangi** agar tebakan selanjutnya menjadi lebih akurat. Proses ini terus diulang (lihat *Tabel Error per Epoch* di atas) hingga total error mencapai 0 atau target iterasi (epoch) maksimum tercapai.
+            """
+        )
+
+    with st.expander("🔍 Lihat Detail Step-by-Step Perubahan Bobot Selama Training"):
+        st.write("Berikut ini adalah log atau rekaman **setiap kali bobot diperbarui** (karena prediksi model meleset) selama proses training:")
+        
+        # Simulasi ulang untuk mencatat history
+        sim_w = np.zeros(repo.X.shape[1])
+        sim_b = 0.0
+        alpha = perceptron.learning_rate
+        history = []
+        
+        for ep in range(perceptron.epoch):
+            error_count = 0
+            for i, (xi, target) in enumerate(zip(repo.X, repo.y)):
+                net_input = np.dot(xi, sim_w) + sim_b
+                pred = 1 if net_input >= 0 else 0
+                err = target - pred
+                if err != 0:
+                    old_w = sim_w.copy()
+                    sim_w += alpha * err * xi
+                    sim_b += alpha * err
+                    error_count += 1
+                    
+                    # Rekam ke history
+                    hist_row = {
+                        "Epoch": ep + 1,
+                        "Baris Data": i + 1,
+                        "Target": target,
+                        "Prediksi": pred,
+                        "Error": err,
+                        "Bias Baru": round(sim_b, 4)
+                    }
+                    for j, fit_name in enumerate(repo.fitur):
+                        hist_row[f"Bobot_{fit_name}"] = round(sim_w[j], 4)
+                    history.append(hist_row)
+            if error_count == 0:
+                break # Sudah konvergen
+                
+        df_hist = pd.DataFrame(history)
+        if not df_hist.empty:
+            st.dataframe(df_hist, width="stretch", hide_index=True)
+            st.caption(f"*Hanya baris data yang mengalami error (meleset) yang memicu perubahan bobot dan bias. Total update: {len(df_hist)} kali.*")
+        else:
+            st.info("Bobot awal sudah langsung memberikan prediksi yang benar (tidak ada perubahan).")
 
     st.divider()
     st.subheader("📊 Visualisasi Garis Keputusan (Decision Boundary) Perceptron")

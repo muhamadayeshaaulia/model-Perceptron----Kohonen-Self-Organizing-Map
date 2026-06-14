@@ -170,6 +170,26 @@ def render(repo, perceptron, som):
             })
             st.dataframe(df_perceptron, width="stretch")
 
+            with st.expander("Bagaimana cara kerja bobot dan bias Perceptron?"):
+                st.write("Bobot dan bias di atas bukanlah angka yang ditebak secara acak, melainkan hasil dari **proses training (pembelajaran) iteratif** Perceptron menggunakan data latih sebelumnya.")
+                st.write("Setiap kali model melakukan kesalahan prediksi pada saat training, ia mengoreksi nilai bobot dan biasnya menggunakan rumus **Perceptron Learning Rule**:")
+                st.latex(r"\Delta w = \alpha \times (y_{\text{target}} - y_{\text{prediksi}}) \times x")
+                st.latex(r"w_{\text{baru}} = w_{\text{lama}} + \Delta w")
+                st.latex(r"b_{\text{baru}} = b_{\text{lama}} + \alpha \times (y_{\text{target}} - y_{\text{prediksi}})")
+
+                st.markdown(
+                    """
+                    **Keterangan:**
+                    - $\\alpha$ (Alpha): **Learning Rate**, menentukan seberapa besar langkah koreksi.
+                    - $y_{\\text{target}}$: Label asli dari dataset (1 untuk Produktif, 0 untuk Tidak Produktif).
+                    - $y_{\\text{prediksi}}$: Prediksi model saat itu.
+                    - $x$: Nilai fitur input.
+                    **Contoh Logika:**
+                    Jika model menebak "Produktif" (1) padahal aslinya "Tidak Produktif" (0), maka $(0 - 1) = -1$.
+                    Bobot fitur yang bernilai positif akan **dikurangi** agar tebakan selanjutnya menjadi lebih akurat. Proses ini sudah diselesaikan pada tahap Training (lihat kurva di atas).
+                    """
+                )
+
             st.markdown("**Persamaan Linear:**")
             st.latex(rf"\text{{Net Input}} = \sum (\text{{Nilai}} \times \text{{Bobot}}) + \text{{Bias}}")
             st.markdown(
