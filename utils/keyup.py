@@ -33,8 +33,4 @@ def keyup_numeric(
         placeholder=placeholder,
         disabled=disabled,
     )
-
-    if key is not None:
-        st.session_state[key] = component_value
-
     return component_value
