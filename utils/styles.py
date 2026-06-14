@@ -145,7 +145,7 @@ def apply_custom_styles():
         }
 
         /* Tombol Utama (Gradien Premium dengan Hover Mikro-Animasi) */
-        div.stButton > button {
+        div.stButton > button, div.stFormSubmitButton > button {
             background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%) !important;
             color: white !important;
             border: none !important;
@@ -160,19 +160,19 @@ def apply_custom_styles():
             cursor: pointer !important;
         }
         
-        div.stButton > button:hover {
+        div.stButton > button:hover, div.stFormSubmitButton > button:hover {
             transform: translateY(-2px) !important;
             box-shadow: 0 8px 20px 0 rgba(79, 70, 229, 0.45) !important;
             background: linear-gradient(135deg, #4338CA 0%, #6D28D9 100%) !important;
             color: white !important;
         }
         
-        div.stButton > button:active {
+        div.stButton > button:active, div.stFormSubmitButton > button:active {
             transform: translateY(0) !important;
             box-shadow: 0 4px 10px 0 rgba(79, 70, 229, 0.3) !important;
         }
         
-        div.stButton > button:disabled {
+        div.stButton > button:disabled, div.stFormSubmitButton > button:disabled {
             background: rgba(128, 128, 128, 0.15) !important;
             color: rgba(128, 128, 128, 0.5) !important;
             box-shadow: none !important;
