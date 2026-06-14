@@ -4,22 +4,7 @@ import pandas as pd
 from utils.helper import normalisasi_data_baru, get_saran, cek_konsistensi
 from utils.styles import apply_custom_styles
 import matplotlib.pyplot as plt
-from st_keyup import st_keyup  # type: ignore
-
-
-def sanitize_numeric_input(val_str):
-    """Menyaring karakter input agar hanya menyisakan angka dan maksimal satu pemisah desimal (. atau ,)."""
-    if not val_str:
-        return ""
-    cleaned = []
-    has_decimal = False
-    for char in val_str:
-        if char.isdigit():
-            cleaned.append(char)
-        elif char in ".," and not has_decimal:
-            cleaned.append(char)
-            has_decimal = True
-    return "".join(cleaned)
+from utils.keyup import keyup_numeric
 
 
 def keyup_number_input(label, key):
@@ -28,13 +13,9 @@ def keyup_number_input(label, key):
     if key in st.session_state:
         raw_val = st.session_state[key]
         if raw_val is not None:
-            raw_val_str = str(raw_val)
-            sanitized = sanitize_numeric_input(raw_val_str)
-            if sanitized != raw_val_str:
-                st.session_state[key] = sanitized
-            val_to_use = sanitized
+            val_to_use = str(raw_val)
 
-    val_str = st_keyup(label, value=val_to_use, key=key)
+    val_str = keyup_numeric(label, value=val_to_use, key=key)
     if not val_str or val_str.strip() == "":
         return None, False
     
